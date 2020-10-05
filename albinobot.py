@@ -1,4 +1,7 @@
 import discord
+import datetime
+import uwuify
+
 intents = discord.Intents.default()
 intents.typing = False
 intents.presences = False
@@ -6,6 +9,14 @@ intents.reactions = True
 client = discord.Client()
 
 discord_token = ''
+
+
+async def delete_message(message):
+    try:
+        await message.delete()
+    except:
+        print("No Perms!")
+        await message.channel.send("Missing Permissions!")
 
 
 @client.event
@@ -21,20 +32,43 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    # print('message {0}'.format(message.content))
+    # check for recursion
     if message.author == client.user:
         return
 
-    if message.content.startswith('$hello'):
-        print('Message received: {0.content}'.format(message))
-        await message.channel.send('Hello!')
-
+    # bot is mentioned
     if "<@!560284009469575169>" in message.content:
-        print('Mentioned: {0}'.format(message.content))
-        await message.channel.send('fuck you {0}'.format(message.author.mention))
+        print('Mentioned: \'{0}\' {1}'.format(message.content, message.author))
+        # get bot's datetime
+        if "time" in message.content:
+            await message.channel.send('It\'s {0}'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
+            # await message.channel.send('fuck you {0}'.format(message.author.mention))
 
+    if message.content.startswith('/uwu '):
+        await delete_message(message)
+        if "nigga" in message.content:
+            await message.channel.send("Fuck you, i'm not saying that {}".format(message.author.mention))
+            return
+        new_message = message.content.replace('/uwu ', '')
+        await message.channel.send(uwuify.uwu(new_message))
 
-async def on_reaction_add(reaction, user):
-    print('bruh')
+    if message.content.startswith('/clear'):
+        await delete_message(message)
+        async for m in message.channel.history(limit=200):
+            if(m.author == client.user):
+                print('Deleted {0}'.format(m.content))
+                await m.delete()
+
+    if message.content.startswith('/delete'):
+        await delete_message(message)
+        op = message.content.replace('/delete ', '')
+        x = op.split()
+        if len(x) > 1:
+            await message.channel.send("Parameter Error!")
+        else:
+            async for m in message.channel.history(limit=int(x[0])):
+                print('Deleted {0}'.format(m.content))
+                await m.delete()
+        print("done deleteing")
 
 client.run(discord_token)
