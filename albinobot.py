@@ -8,7 +8,7 @@ intents.presences = False
 intents.reactions = True
 client = discord.Client()
 
-discord_token = ''
+discord_token = 'NTYwMjg0MDA5NDY5NTc1MTY5.XJrbJQ.wUOMzEEV9UuivGM8rNJG4iyYpw8'
 
 
 async def delete_message(message):
@@ -64,11 +64,16 @@ async def on_message(message):
         op = message.content.replace('/delete ', '')
         x = op.split()
         if len(x) > 1:
+            print("/delete: incorrect number of args")
             await message.channel.send("Parameter Error!")
         else:
-            async for m in message.channel.history(limit=int(x[0])):
-                print('Deleted {0}'.format(m.content))
-                await m.delete()
+            try:
+                async for m in message.channel.history(limit=int(x[0])):
+                    print('Deleted \'{0}\''.format(m.content))
+                    await m.delete()
+            except:
+                print("/delete: expected int but got {}".format(x[0]))
+                await message.channel.send("Parameter Error!")
         print("done deleteing")
 
 client.run(discord_token)
