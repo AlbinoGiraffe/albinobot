@@ -8,7 +8,7 @@ intents.presences = False
 intents.reactions = True
 client = discord.Client()
 
-discord_token = 'NTYwMjg0MDA5NDY5NTc1MTY5.XJrbJQ.wUOMzEEV9UuivGM8rNJG4iyYpw8'
+discord_token = ''
 
 
 async def delete_message(message):
@@ -44,11 +44,9 @@ async def on_message(message):
             await message.channel.send('It\'s {0}'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
             # await message.channel.send('fuck you {0}'.format(message.author.mention))
 
+    # uwuify
     if message.content.startswith('/uwu '):
         await delete_message(message)
-        if "nigga" in message.content:
-            await message.channel.send("Fuck you, i'm not saying that {}".format(message.author.mention))
-            return
         new_message = message.content.replace('/uwu ', '')
         await message.channel.send(uwuify.uwu(new_message))
 
@@ -74,6 +72,7 @@ async def on_message(message):
             except:
                 print("/delete: expected int but got {}".format(x[0]))
                 await message.channel.send("Parameter Error!")
-        print("done deleteing")
+        print("done deleting")
+
 
 client.run(discord_token)
