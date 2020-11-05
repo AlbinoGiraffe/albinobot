@@ -1,6 +1,8 @@
 import discord
 import datetime
 import uwuify
+import os
+from dotenv import load_dotenv
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -8,8 +10,8 @@ intents.presences = False
 intents.reactions = True
 client = discord.Client()
 
-discord_token = ''
-
+load_dotenv()
+discord_token = os.getenv("DISCORD_TOKEN")
 
 async def delete_message(message):
     try:
