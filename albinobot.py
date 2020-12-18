@@ -1,6 +1,7 @@
-import discord
-import datetime
 import uwuify
+import datetime
+import discord
+import sys
 import os
 from dotenv import load_dotenv
 
@@ -12,34 +13,36 @@ client = discord.Client()
 
 load_dotenv()
 discord_token = os.getenv("DISCORD_TOKEN")
+print(discord_token)
+
 
 async def delete_message(message):
     try:
         await message.delete()
     except:
         print("No Perms!")
-        await message.channel.send("Missing Permissions!")
+        # await message.channel.send("Missing Permissions!")
 
 
-@client.event
+@ client.event
 async def on_connect():
     print('Bot connected')
 
 
-@client.event
+@ client.event
 async def on_ready():
     print('Logged in as {0.user}'.format(client))
     print('Waiting')
 
 
-@client.event
+@ client.event
 async def on_message(message):
     # check for recursion
     if message.author == client.user:
         return
 
     # bot is mentioned
-    if "<@!560284009469575169>" in message.content:
+    if client.user.mentioned_in(message):
         print('Mentioned: \'{0}\' {1}'.format(message.content, message.author))
         # get bot's datetime
         if "time" in message.content:
@@ -56,10 +59,10 @@ async def on_message(message):
         await delete_message(message)
         async for m in message.channel.history(limit=200):
             if(m.author == client.user):
-                print('Deleted {0}'.format(m.content))
                 await m.delete()
+                print('Deleted {0}'.format(m.content))
 
-    if message.content.startswith('/delete'):
+    if message.content.startswith('/delete '):
         await delete_message(message)
         op = message.content.replace('/delete ', '')
         x = op.split()
