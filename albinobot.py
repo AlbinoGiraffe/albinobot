@@ -12,6 +12,7 @@ client = discord.Client()
 
 load_dotenv()
 discord_token = os.getenv("DISCORD_TOKEN")
+# print(discord_token)
 
 async def delete_message(message):
     try:
