@@ -18,7 +18,8 @@ discord_token = os.getenv("DISCORD_TOKEN")
 
 async def delete_message(message):
     try:
-        await message.delete()
+        if(not message.author == client.user):
+            await message.delete()
     except:
         print("No Perms!")
         # await message.channel.send("Missing Permissions!")
@@ -63,6 +64,7 @@ async def on_message(message):
                 print('Deleted {0}'.format(m.content))
 
     if message.content.startswith('/delete '):
+        numDeleted=0
         await delete_message(message)
         op = message.content.replace('/delete ', '')
         x = op.split()
@@ -71,13 +73,15 @@ async def on_message(message):
             await message.channel.send("Parameter Error!")
         else:
             try:
+                
                 async for m in message.channel.history(limit=int(x[0])):
+                    numDeleted += 1
                     print('Deleted \'{0}\''.format(m.content))
                     await m.delete()
             except:
                 print("/delete: expected int but got {}".format(x[0]))
                 await message.channel.send("Parameter Error!")
-        print("done deleting")
+        print("done deleting ({} messages)".format(numDeleted))
 
 
 client.run(discord_token)
