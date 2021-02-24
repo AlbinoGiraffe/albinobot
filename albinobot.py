@@ -3,6 +3,8 @@ import datetime
 import discord
 import sys
 import os
+import hashlib
+import random
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
@@ -15,6 +17,22 @@ load_dotenv()
 discord_token = os.getenv("DISCORD_TOKEN")
 # print(discord_token)
 
+async def zodiac(question, message):
+    zhash = hashlib.md5(question.encode('utf-8'))
+    random.seed(zhash)
+    x = random.randint(0,2)
+    if(x == 0):
+        await message.channel.send("Yes!")
+        print('yes')
+    else:
+        if(x==1):
+            await message.channel.send("No!")
+            print('no')
+        else:
+            await message.channel.send("IDK BRUH!")
+            print('idk')
+
+    print('zodiac')
 
 async def delete_message(message):
     try:
@@ -41,11 +59,11 @@ async def on_message(message):
     # check for recursion
     if message.author == client.user:
         return
-
-    print('New Message: {}'.format(message.author.id))
+    if 'logs' not in message.channel.name:
+        print('New Message: {}'.format(message.author.id))
 
     if "nigga" in message.content:
-        await message.channel.send('SHUT THE FUCK UP')
+        await message.channel.send('@mods, {0} said the N word!'.format(message.author.mention))
 
     # if  message.author.id == 476593458392596490:
     #     await message.channel.send('SHUT THE FUCK UP <@476593458392596490>')
@@ -53,14 +71,16 @@ async def on_message(message):
     # bot is mentioned
     if client.user.mentioned_in(message):
         print('Mentioned: \'{0}\' {1}'.format(message.content, message.author))
+        
         # get bot's datetime
         if "time" in message.content:
             await message.channel.send('It\'s {0}'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
+        else:
+            await message.channel.send('Hi {0}!'.format(message.author.mention))
             # await message.channel.send('fuck you {0}'.format(message.author.mention))
 
     # uwuify
     if message.content.startswith('/uwu '):
-        await delete_message(message)
         new_message = message.content.replace('/uwu ', '')
         await message.channel.send(uwuify.uwu(new_message))
 
@@ -90,6 +110,19 @@ async def on_message(message):
                 print("/delete: expected int but got {}".format(x[0]))
                 await message.channel.send("Parameter Error!")
         print("done deleting ({} messages)".format(numDeleted))
+
+    if message.content.startswith('.gb '):
+        op = message.content.replace('.gb ', '')
+        if len(op) < 1:
+            print(".gb: incorrect number of args")
+            await message.channel.send("Parameter Error!")
+        else:
+            print('message: {0}'.format(op))
+            # await message.channel.send("it brokey!")
+            await zodiac(op, message)
+
+        
+    
 
 
 client.run(discord_token)
