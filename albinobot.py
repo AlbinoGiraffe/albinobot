@@ -62,9 +62,6 @@ async def on_message(message):
     if 'logs' not in message.channel.name:
         print('New Message: {}'.format(message.author.id))
 
-    if "nigga" in message.content:
-        await message.channel.send('@mods, {0} said the N word!'.format(message.author.mention))
-
     # if  message.author.id == 476593458392596490:
     #     await message.channel.send('SHUT THE FUCK UP <@476593458392596490>')
 
