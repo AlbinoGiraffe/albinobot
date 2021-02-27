@@ -118,5 +118,8 @@ async def on_message(message):
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
 
+    if message.content.startswith('.ping'):
+        await message.channel.send("Pong!")
+
 
 client.run(discord_token)
