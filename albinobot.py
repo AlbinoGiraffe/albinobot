@@ -4,6 +4,7 @@ import discord
 import sys
 import os
 import random
+import cleverbotfree.cbfree
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
@@ -13,6 +14,7 @@ intents.reactions = True
 client = discord.Client()
 
 load_dotenv()
+cb = cleverbotfree.cbfree.Cleverbot()
 discord_token = os.getenv("DISCORD_TOKEN")
 # print(discord_token)
 
@@ -73,8 +75,10 @@ async def on_message(message):
         if "time" in message.content:
             await message.channel.send('It\'s {0}'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
         else:
-            await message.channel.send('Hi {0}!'.format(message.author.mention))
-            # await message.channel.send('fuck you {0}'.format(message.author.mention))
+            query = message.content.replace('<@!560284009469575169> ', '')
+            print('query: {}'.format(query))
+            response = cb.single_exchange(query)
+            await message.channel.send(response)
 
     # uwuify
     if message.content.startswith('/uwu '):
