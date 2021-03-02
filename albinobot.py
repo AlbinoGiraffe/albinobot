@@ -62,16 +62,12 @@ async def on_message(message):
     if message.author == client.user:
         return
     
-    # bot is DM'd
-    if isinstance(message.channel, discord.channel.DMChannel):
-        await message.channel.send(cb.single_exchange(message.content))
-
     # log messages
     if hasattr(message, 'name'):
         if 'logs' not in message.channel.name:
-            print('New Message: {0}, Channel: {1}'.format(message.author.name, message.channel.name))
+            print('New Message: {0}, Channel: {1}, User: {3}'.format(message.content, message.channel.name, message.author.name))
     else:
-        print('New Message: {0}, Channel: {1}'.format(message.author.name, message.channel))
+        print('New Message: {0}, Channel: {1}, User: {3}'.format(message.content, message.channel, message.author.name))
 
     # bot is mentioned
     if client.user.mentioned_in(message):
@@ -132,14 +128,17 @@ async def on_message(message):
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
     
+    if message.content.startswith('/say '):
+        new_message = message.content.replace('/say ', '')
+        await delete_message(message)
+        await message.channel.send(new_message)
+
     # ping tool
     if message.content.startswith('.ping'):
         await message.channel.send("Pong!")
     
-    if message.content.startswith('!say '):
-        phrase = message.content.replace('!say ', '')
-        await delete_message(message)
-        await message.channel.send(phrase)
-
+    # bot is DM'd
+    if isinstance(message.channel, discord.channel.DMChannel):
+        await message.channel.send(cb.single_exchange(message.content))
 
 client.run(discord_token)
