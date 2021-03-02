@@ -59,14 +59,12 @@ async def on_ready():
 @ client.event
 async def on_message(message):
     # check for recursion
+    if message.author == client.user:
+            return
 
     # if(message.author.id == 736726609276567642):
     #     await message.add_reaction('🍞')
 
-
-    if message.author == client.user:
-        return
-    
     # log messages
     if hasattr(message, 'name'):
         if 'logs' not in message.channel.name:
@@ -94,33 +92,34 @@ async def on_message(message):
         await message.channel.send(uwuify.uwu(new_message))
 
     # clear bot messages
-    if message.content.startswith('/clear'):
-        await delete_message(message)
-        async for m in message.channel.history(limit=200):
-            if(m.author == client.user):
-                await m.delete()
-                print('Deleted {0}'.format(m.content))
-
-    # delete x number of messages
-    if message.content.startswith('/delete '):
-        numDeleted = 0
-        await delete_message(message)
-        op = message.content.replace('/delete ', '')
-        x = op.split()
-        if len(x) > 1:
-            print("/delete: incorrect number of args")
-            await message.channel.send("Parameter Error!")
-        else:
-            try:
-
-                async for m in message.channel.history(limit=int(x[0])):
-                    numDeleted += 1
-                    print('Deleted \'{0}\''.format(m.content))
+    if(message.author.id == 217644900475338752):
+        if message.content.startswith('/clear'):
+            await delete_message(message)
+            async for m in message.channel.history(limit=200):
+                if(m.author == client.user):
                     await m.delete()
-            except:
-                print("/delete: expected int but got {}".format(x[0]))
+                    print('Deleted {0}'.format(m.content))
+
+        # delete x number of messages
+        if message.content.startswith('/delete '):
+            numDeleted = 0
+            await delete_message(message)
+            op = message.content.replace('/delete ', '')
+            x = op.split()
+            if len(x) > 1:
+                print("/delete: incorrect number of args")
                 await message.channel.send("Parameter Error!")
-        print("done deleting ({} messages)".format(numDeleted))
+            else:
+                try:
+
+                    async for m in message.channel.history(limit=int(x[0])):
+                        numDeleted += 1
+                        print('Deleted \'{0}\''.format(m.content))
+                        await m.delete()
+                except:
+                    print("/delete: expected int but got {}".format(x[0]))
+                    await message.channel.send("Parameter Error!")
+            print("done deleting ({} messages)".format(numDeleted))
 
     # RNG bot
     if message.content.startswith('.gb '):
