@@ -59,19 +59,24 @@ async def on_ready():
 @ client.event
 async def on_message(message):
     # check for recursion
+
+    # if(message.author.id == 736726609276567642):
+    #     await message.add_reaction('🍞')
+
+
     if message.author == client.user:
         return
     
     # log messages
     if hasattr(message, 'name'):
         if 'logs' not in message.channel.name:
-            print('New Message: {0}, Channel: {1}, User: {3}'.format(message.content, message.channel.name, message.author.name))
+            print('New Message: {0}, Channel: {1}, User: {2}'.format(message.content, message.channel.name, message.author.name))
     else:
-        print('New Message: {0}, Channel: {1}, User: {3}'.format(message.content, message.channel, message.author.name))
+        print('New Message: {0}, Channel: {1}, User: {2}'.format(message.content, message.channel, message.author.name))
 
     # bot is mentioned
     if client.user.mentioned_in(message):
-        print('Mentioned: \'{0}\' {1}'.format(message.content, message.author))
+        print('Mentioned: \'{0}\' {1}'.format(message.content, message.author.name))
 
         # get bot's datetime
         if "time" in message.content:
