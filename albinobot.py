@@ -61,11 +61,17 @@ async def on_message(message):
     # check for recursion
     if message.author == client.user:
         return
-    if 'logs' not in message.channel.name:
-        print('New Message: {}'.format(message.author.name))
+    
+    # bot is DM'd
+    if isinstance(message.channel, discord.channel.DMChannel):
+        await message.channel.send(cb.single_exchange(message.content))
 
-    # if message.author.id == 476593458392596490:
-    #     await message.channel.send('SHUT THE FUCK UP <@476593458392596490>')
+    # log messages
+    if hasattr(message, 'name'):
+        if 'logs' not in message.channel.name:
+            print('New Message: {0}, Channel: {1}'.format(message.author.name, message.channel.name))
+    else:
+        print('New Message: {0}, Channel: {1}'.format(message.author.name, message.channel))
 
     # bot is mentioned
     if client.user.mentioned_in(message):
@@ -75,6 +81,7 @@ async def on_message(message):
         if "time" in message.content:
             await message.channel.send('It\'s {0}'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
         else:
+            # send cleverbot query
             query = message.content.replace('<@!560284009469575169> ', '')
             print('query: {}'.format(query))
             response = cb.single_exchange(query)
@@ -85,6 +92,7 @@ async def on_message(message):
         new_message = message.content.replace('/uwu ', '')
         await message.channel.send(uwuify.uwu(new_message))
 
+    # clear bot messages
     if message.content.startswith('/clear'):
         await delete_message(message)
         async for m in message.channel.history(limit=200):
@@ -92,6 +100,7 @@ async def on_message(message):
                 await m.delete()
                 print('Deleted {0}'.format(m.content))
 
+    # delete x number of messages
     if message.content.startswith('/delete '):
         numDeleted = 0
         await delete_message(message)
@@ -112,6 +121,7 @@ async def on_message(message):
                 await message.channel.send("Parameter Error!")
         print("done deleting ({} messages)".format(numDeleted))
 
+    # RNG bot
     if message.content.startswith('.gb '):
         op = message.content.replace('.gb ', '')
         if len(op) < 1:
@@ -121,7 +131,8 @@ async def on_message(message):
             print('message: {0}'.format(op))
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
-
+    
+    # ping tool
     if message.content.startswith('.ping'):
         await message.channel.send("Pong!")
     
@@ -129,7 +140,6 @@ async def on_message(message):
         phrase = message.content.replace('!say ', '')
         await delete_message(message)
         await message.channel.send(phrase)
-
 
 
 client.run(discord_token)
