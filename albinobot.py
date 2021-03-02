@@ -124,6 +124,12 @@ async def on_message(message):
 
     if message.content.startswith('.ping'):
         await message.channel.send("Pong!")
+    
+    if message.content.startswith('!say '):
+        phrase = message.content.replace('!say ', '')
+        await delete_message(message)
+        await message.channel.send(phrase)
+
 
 
 client.run(discord_token)
