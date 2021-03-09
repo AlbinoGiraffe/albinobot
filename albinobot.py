@@ -65,10 +65,10 @@ async def on_message(message):
     # log messages
     if hasattr(message, 'name'):
         if 'logs' not in message.channel.name:
-            print('New Message: {0}, Channel: {1}, User: {3}'.format(
+            print('New Message: {0}, Channel: {1}, User: {2}'.format(
                 message.content, message.channel.name, message.author.name))
     else:
-        print('New Message: {0}, Channel: {1}, User: {3}'.format(
+        print('New Message: {0}, Channel: {1}, User: {2}'.format(
             message.content, message.channel, message.author.name))
 
     # bot is mentioned
