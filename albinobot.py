@@ -91,8 +91,9 @@ async def on_message(message):
         new_message = message.content.replace('/uwu ', '')
         await message.channel.send(uwuify.uwu(new_message))
 
-    # clear bot messages
+    # only owner can run these >:)
     if(message.author.id == 217644900475338752):
+        # clear bot messages
         if message.content.startswith('/clear'):
             await delete_message(message)
             async for m in message.channel.history(limit=200):
