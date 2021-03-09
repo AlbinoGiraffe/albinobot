@@ -145,7 +145,7 @@ async def on_message(message):
         await message.channel.send(cb.single_exchange(message.content))
 
     # github link
-    if message.content.startswith('.github'):
+    if ".github" in message.content:
         await message.channel.send("https://github.com/AlbinoGiraffe/AlbinoBot")
 
     # bot is DM'd
