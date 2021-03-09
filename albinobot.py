@@ -73,7 +73,8 @@ async def on_message(message):
 
     # bot is mentioned
     if client.user.mentioned_in(message):
-        print('Mentioned: \'{0}\' {1}'.format(message.content, message.author))
+        print('Mentioned: \'{0}\' {1}'.format(
+            message.content, message.author.name))
 
         # get bot's datetime
         if "time" in message.content:
@@ -91,33 +92,34 @@ async def on_message(message):
         await message.channel.send(uwuify.uwu(new_message))
 
     # clear bot messages
-    if message.content.startswith('/clear'):
-        await delete_message(message)
-        async for m in message.channel.history(limit=200):
-            if(m.author == client.user):
-                await m.delete()
-                print('Deleted {0}'.format(m.content))
-
-    # delete x number of messages
-    if message.content.startswith('/delete '):
-        numDeleted = 0
-        await delete_message(message)
-        op = message.content.replace('/delete ', '')
-        x = op.split()
-        if len(x) > 1:
-            print("/delete: incorrect number of args")
-            await message.channel.send("Parameter Error!")
-        else:
-            try:
-
-                async for m in message.channel.history(limit=int(x[0])):
-                    numDeleted += 1
-                    print('Deleted \'{0}\''.format(m.content))
+    if(message.author.id == 217644900475338752):
+        if message.content.startswith('/clear'):
+            await delete_message(message)
+            async for m in message.channel.history(limit=200):
+                if(m.author == client.user):
                     await m.delete()
-            except:
-                print("/delete: expected int but got {}".format(x[0]))
+                    print('Deleted {0}'.format(m.content))
+
+        # delete x number of messages
+        if message.content.startswith('/delete '):
+            numDeleted = 0
+            await delete_message(message)
+            op = message.content.replace('/delete ', '')
+            x = op.split()
+            if len(x) > 1:
+                print("/delete: incorrect number of args")
                 await message.channel.send("Parameter Error!")
-        print("done deleting ({} messages)".format(numDeleted))
+            else:
+                try:
+
+                    async for m in message.channel.history(limit=int(x[0])):
+                        numDeleted += 1
+                        print('Deleted \'{0}\''.format(m.content))
+                        await m.delete()
+                except:
+                    print("/delete: expected int but got {}".format(x[0]))
+                    await message.channel.send("Parameter Error!")
+            print("done deleting ({} messages)".format(numDeleted))
 
     # RNG bot
     if message.content.startswith('.gb '):
@@ -129,7 +131,6 @@ async def on_message(message):
             print('message: {0}'.format(op))
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
-
     if message.content.startswith('/say '):
         new_message = message.content.replace('/say ', '')
         await delete_message(message)
@@ -138,6 +139,10 @@ async def on_message(message):
     # ping tool
     if message.content.startswith('.ping'):
         await message.channel.send("Pong!")
+
+    # bot is DM'd
+    if isinstance(message.channel, discord.channel.DMChannel):
+        await message.channel.send(cb.single_exchange(message.content))
 
     # github link
     if message.content.startswith('.github'):
