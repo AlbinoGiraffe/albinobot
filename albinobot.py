@@ -84,7 +84,7 @@ async def on_message(message):
             query = message.content.replace('<@!560284009469575169> ', '')
             print('query: {}'.format(query))
             response = cb.single_exchange(query)
-            await message.channel.send(response)
+            await message.channel.send("{0} {1}".format(message.author.mention, response))
 
     # uwuify
     if message.content.startswith('/uwu '):
@@ -148,9 +148,5 @@ async def on_message(message):
     # github link
     if ".github" in message.content:
         await message.channel.send("https://github.com/AlbinoGiraffe/AlbinoBot")
-
-    # bot is DM'd
-    if isinstance(message.channel, discord.channel.DMChannel):
-        await message.channel.send(cb.single_exchange(message.content))
 
 client.run(discord_token)
