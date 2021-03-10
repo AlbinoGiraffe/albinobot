@@ -91,6 +91,7 @@ async def on_message(message):
     if message.content.startswith('/uwu '):
         new_message = message.content.replace('/uwu ', '')
         await message.channel.send(uwuify.uwu(new_message))
+        await delete_message(message)
 
     # only owner can run these >:)
     if(message.author.id == 217644900475338752):
