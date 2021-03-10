@@ -84,7 +84,8 @@ async def on_message(message):
             query = message.content.replace('<@!560284009469575169> ', '')
             print('query: {}'.format(query))
             response = cb.single_exchange(query)
-            await message.channel.send("{0} {1}".format(message.author.mention, response))
+            # await message.channel.send("{0} {1}".format(message.author.mention, response))
+            await message.reply(response)
 
     # uwuify
     if message.content.startswith('/uwu '):
