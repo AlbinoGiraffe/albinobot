@@ -76,9 +76,6 @@ async def on_message(message):
         print('Mentioned: \'{0}\' {1}'.format(
             message.content, message.author.name))
 
-        # get bot's datetime
-        if "time" in message.content:
-            await message.channel.send('It\'s {0}'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
         else:
             # send cleverbot query
             query = message.content.replace('<@!560284009469575169> ', '')
@@ -134,6 +131,7 @@ async def on_message(message):
             print('message: {0}'.format(op))
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
+
     if message.content.startswith('/say '):
         new_message = message.content.replace('/say ', '')
         await delete_message(message)
@@ -142,6 +140,10 @@ async def on_message(message):
     # ping tool
     if message.content.startswith('.ping'):
         await message.channel.send("Pong!")
+
+    # get bot's datetime
+    if ".time" in message.content:
+        await message.channel.send('It\'s {0} PST'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
