@@ -75,14 +75,13 @@ async def on_message(message):
     if client.user.mentioned_in(message):
         print('Mentioned: \'{0}\' {1}'.format(
             message.content, message.author.name))
-
-        else:
-            # send cleverbot query
-            query = message.content.replace('<@!560284009469575169> ', '')
-            print('query: {}'.format(query))
-            response = cb.single_exchange(query)
-            # await message.channel.send("{0} {1}".format(message.author.mention, response))
-            await message.reply(response)
+            
+        # send cleverbot query
+        query = message.content.replace('<@!560284009469575169> ', '')
+        print('query: {}'.format(query))
+        response = cb.single_exchange(query)
+        # await message.channel.send("{0} {1}".format(message.author.mention, response))
+        await message.reply(response)
 
     # uwuify
     if message.content.startswith('/uwu '):
