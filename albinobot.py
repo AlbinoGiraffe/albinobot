@@ -8,7 +8,7 @@ import cleverbotfree.cbfree
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
-intents.typing = False
+intents.typing = True
 intents.presences = False
 intents.reactions = True
 client = discord.Client()
