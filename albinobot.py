@@ -87,7 +87,7 @@ async def on_message(message):
     if message.content.startswith('/uwu '):
         new_message = message.content.replace('/uwu ', '')
         # sanitize input
-        new_message = new_message.content.replace('@everyone', '@\u200beveryone')
+        new_message = new_message.replace('@everyone', '@\u200beveryone')
         await message.channel.send(uwuify.uwu(new_message))
         await delete_message(message)
 
@@ -126,7 +126,7 @@ async def on_message(message):
         if message.content.startswith('/say '):
             new_message = message.content.replace('/say ', '')
             # sanitize input
-            new_message = new_message.content.replace('@everyone', '@\u200beveryone')
+            new_message = new_message.replace('@everyone', '@\u200beveryone')
             await delete_message(message)
             await message.channel.send(new_message)
 
