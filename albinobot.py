@@ -86,6 +86,8 @@ async def on_message(message):
     # uwuify
     if message.content.startswith('/uwu '):
         new_message = message.content.replace('/uwu ', '')
+        # sanitize input
+        new_message = message.content.replace('@everyone', '@\u200beveryone')
         await message.channel.send(uwuify.uwu(new_message))
         await delete_message(message)
 
@@ -119,6 +121,14 @@ async def on_message(message):
                     print("/delete: expected int but got {}".format(x[0]))
                     await message.channel.send("Parameter Error!")
             print("done deleting ({} messages)".format(numDeleted))
+        
+        # make bot say something
+        if message.content.startswith('/say '):
+            new_message = message.content.replace('/say ', '')
+            # sanitize input
+            new_message = message.content.replace('@everyone', '@\u200beveryone')
+            await delete_message(message)
+            await message.channel.send(new_message)
 
     # RNG bot
     if message.content.startswith('.gb '):
@@ -131,10 +141,7 @@ async def on_message(message):
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
 
-    if message.content.startswith('/say '):
-        new_message = message.content.replace('/say ', '')
-        await delete_message(message)
-        await message.channel.send(new_message)
+    
 
     # ping tool
     if message.content.startswith('.ping'):
