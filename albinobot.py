@@ -4,7 +4,6 @@ import discord
 import sys
 import os
 import random
-import cleverbotfree.cbfree
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
@@ -77,10 +76,10 @@ async def on_message(message):
             message.content, message.author.name))
             
         # send cleverbot query
-        query = query.replace('<@!560284009469575169> ', '')
-        query = message.content.replace('<.*?> ', '')
+        query = message.content.replace('<@!560284009469575169> ', '')
+        query = query.replace('<', '')
         print('query: {}'.format(query))
-        response = await cb.single_exchange(query)
+        response = cb.single_exchange(query)
         # await message.channel.send("{0} {1}".format(message.author.mention, response))
         await message.reply(response)
 
