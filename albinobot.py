@@ -77,9 +77,10 @@ async def on_message(message):
             message.content, message.author.name))
             
         # send cleverbot query
-        query = message.content.replace('<@!560284009469575169> ', '')
+        query = query.replace('<@!560284009469575169> ', '')
+        query = message.content.replace('<.*?> ', '')
         print('query: {}'.format(query))
-        response = cb.single_exchange(query)
+        response = await cb.single_exchange(query)
         # await message.channel.send("{0} {1}".format(message.author.mention, response))
         await message.reply(response)
 
