@@ -4,6 +4,7 @@ import discord
 import sys
 import os
 import random
+import cleverbotfree.cbfree
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
@@ -134,10 +135,10 @@ async def on_message(message):
     if message.content.startswith('.gb '):
         op = message.content.replace('.gb ', '')
         if len(op) < 1:
-            print(".gb: incorrect number of args")
-            await message.channel.send("Parameter Error!")
+            print("zodiac: incorrect number of args")
+            # await message.channel.send("Parameter Error!")
         else:
-            print('message: {0}'.format(op))
+            print('zodiac: message: {0}'.format(op))
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
 
