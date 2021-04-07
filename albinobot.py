@@ -160,4 +160,17 @@ async def on_message(message):
     if ".github" in message.content:
         await message.channel.send("https://github.com/AlbinoGiraffe/AlbinoBot")
 
+@client.event
+async def on_message_delete(message):
+    print("message deleted: {}".format(message.content))
+    if(message.author.id == 670058949709529094):
+        channel = client.get_channel(829165070734327858)
+        embed = discord.Embed(title="Takyon deleted a message", description="", color=0xe74c3c)
+        # embed.add_field(name)
+        embed.add_field(name="Message:", value=message.content, inline=True)
+        embed.set_footer(text="id: {} | {}".format(message.id, message.created_at))
+
+        await channel.send(embed=embed)
+
+
 client.run(discord_token)
