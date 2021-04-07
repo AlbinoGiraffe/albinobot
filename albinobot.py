@@ -169,6 +169,7 @@ async def on_message_delete(message):
         # embed.add_field(name)
         embed.add_field(name="Message:", value=message.content, inline=True)
         embed.set_footer(text="id: {} | {}".format(message.id, message.created_at))
+        
 
         await channel.send(embed=embed)
 
