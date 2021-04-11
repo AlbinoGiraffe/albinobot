@@ -162,31 +162,33 @@ async def on_message(message):
 
 @client.event
 async def on_message_delete(message):
-    print("message deleted ({}): {}".format(message.author.name, message.content))
-    if(message.author.id == 670058949709529094):
-        channel = client.get_channel(829165070734327858)
-        embed = discord.Embed(title="Takyon deleted a message", description="", color=0xe74c3c)
-        # embed.add_field(name)
-        embed.add_field(name="Message:", value=message.content, inline=True)
-        embed.set_footer(text="id: {} | {} | #{}".format(message.id, message.created_at, message.channel.name))
+    if(message.guild.id == 760375168815071264):
+        print("message deleted ({}): {}".format(message.author.name, message.content))
+        if(message.author.id == 670058949709529094):
+            channel = client.get_channel(829165070734327858)
+            embed = discord.Embed(title="Takyon deleted a message", description="", color=0xe74c3c)
+            # embed.add_field(name)
+            embed.add_field(name="Message:", value=message.content, inline=True)
+            embed.set_footer(text="id: {} | {} | #{}".format(message.id, message.created_at, message.channel.name))
 
 
-        await channel.send(embed=embed)
+            await channel.send(embed=embed)
 
 @client.event
 async def on_message_edit(before, after):
-    print("message edited ({}): before: {}, after: {}".format(before.author.name, before.content, after.content))
-    if(after.author.id == 670058949709529094):
-        channel = client.get_channel(829165070734327858)
-        embed = discord.Embed(title="Takyon edited a message", description="", color=0xe74c3c)
-        # embed.add_field(name)
-        embed.add_field(name="Before:", value=before.content, inline=True)
-        embed.add_field(name="After:", value=after.content, inline=True)
-        
-        embed.set_footer(text="{} | #{}".format(after.created_at, after.channel.name))
-        
+    if(after.guild.id == 760375168815071264):
+        print("message edited ({}): before: {}, after: {}".format(before.author.name, before.content, after.content))
+        if(after.author.id == 670058949709529094):
+            channel = client.get_channel(829165070734327858)
+            embed = discord.Embed(title="Takyon edited a message", description="", color=0xe74c3c)
+            # embed.add_field(name)
+            embed.add_field(name="Before:", value=before.content, inline=True)
+            embed.add_field(name="After:", value=after.content, inline=True)
+            
+            embed.set_footer(text="{} | #{}".format(after.created_at, after.channel.name))
+            
 
-        await channel.send(embed=embed)
+            await channel.send(embed=embed)
 
 @client.event
 async def on_raw_reaction_add(payload):
