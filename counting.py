@@ -1,75 +1,73 @@
-import discord
-import os
-from dotenv import load_dotenv
+# importing the requests library
+import requests
+import re
+import hashlib
+import urllib.parse
 
-intents = discord.Intents.default()
-intents.typing = False
-intents.presences = False
-intents.reactions = True
-client = discord.Client()
+# api-endpoint
+URL = "https://www.cleverbot.com/webservicemin?uc=UseOfficialCleverbotAPI"
 
-load_dotenv()
-discord_token = os.getenv("DISCORD_TOKEN")
-
-async def delete_message(message):
-    try:
-        await message.delete()
-    except:
-        print("No Perms!")
-        await message.channel.send("Missing Permissions!")
-
-global currentNum
-
-@client.event
-async def on_connect():
+def getCookie():
+    r = requests.get('https://www.cleverbot.com/extras/conversation-social-min.js')
+    # cookie = r.headers['Set-cookie']
+    match = re.findall("md5\([^)]+substring\((\d+),(\d+)\)", r.text)
     
-    currentNum = 0
-    print('Bot connected')
-
-
-@client.event
-async def on_ready():
-    print('Logged in as {0.user}'.format(client))
-    print('Waiting')
-
-
-@client.event
-async def on_message(message):
-    # check for recursion
-    if message.author == client.user:
-        return
-    m = await message.channel.history(limit=2).flatten()
+    print(match[0])
+    if(not match):
+        print("Bad Fishe")
+    else:
+        lower_md5 = match[0][0]
+        upper_md5 = match[0][1]
     
+    return {lower_md5, upper_md5}
 
-    if(message.content.startswith('/stop')):
-        await client.logout()
-    if(message.content.startswith('/count ')):
-        await delete_message(message)
-        op = message.content.replace('/count ', '')
-        x = op.split()
-        if len(x) > 1:
-            print("/count: incorrect number of args")
-            await message.channel.send("Parameter Error!")
+def getCookie2():
+    r = requests.get('https://www.cleverbot.com/')
+    cookie = r.headers['set-cookie']
+
+    print(cookie)
+
+    return cookie
+
+def encode(msg):
+    f = ""
+    d = ""
+    msg = msg.replace("/[|]/g", "{*}")
+
+    for i in msg:
+        if(ord(i) > 255):
+            d = repr(i)
+            if(d[0:2] == '%u'):
+                f += '|' + d[2:]
+            else:
+                f += d
         else:
-            currentNum = x
-            print("currentNum set to {0}".format(x))
+            f += i
+        
+    f = f.replace('|201C', "'").replace('|201D', "'").replace('|2018', "'").replace('|2019', "'").replace('`', "'").replace('%B4', "'").replace('|FF20', '').replace('|FE6B', '')
 
-    if(message.channel.name.startswith('counting-test')):
-        # await message.channel.send('Bruh moment')
-        print('last message: {0}'.format(m[1].content))
-        lastMessage = m[1].content
+    print(f)
+    return f
 
-        if(currentNum == 0):
-            currentNum = lastMessage
+async def send(msg):
+    body = "stimulus=" + encode(msg)
+    # for i in range(0, len(msg)):
+    #     body += '&vText' + (i + 2) + '=' + encodeForSending(this.messages[i]);
+    body += '&cb_settings_language=en'
+    body += '&cb_settings_scripting=no'
+    # if (this.internalId):
+    #     body += '&sessionid=' + this.internalId
 
-        # Check if message is a number
-        try:
-            num = int(message.content)
-        except:
-            print('not a number: {0}'.format(message.content))
-            await message.delete()
+    body += '&islearning=1'
+    body += '&icognoid=wsf'
+    body += '&icognocheck=' + str(hashlib.md5(body[7:33].encode('utf-8')).hexdigest())
 
+    print(body)
 
-client.run(discord_token)
+    head = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:7.0.1) Gecko/20100101 Firefox/7.0",
+            "Referer": "https://www.cleverbot.com",
+            "Origin":  "https://www.cleverbot.com",
+            "Cookie": "XVIS=TEI939AFFIAGAYQZ"}
+    r = requests.post(url = URL, data = body, timeout = 5000, headers = head)
 
-
+    print(urllib.parse.unquote(r.headers['CBOUTPUT']))

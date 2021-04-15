@@ -4,6 +4,10 @@ import discord
 import sys
 import os
 import random
+import requests
+import re
+import hashlib
+import urllib.parse
 import cleverbotfree.cbfree
 from dotenv import load_dotenv
 
@@ -18,22 +22,23 @@ cb = cleverbotfree.cbfree.Cleverbot()
 discord_token = os.getenv("DISCORD_TOKEN")
 # print(discord_token)
 
+URL = "https://www.cleverbot.com/webservicemin?uc=UseOfficialCleverbotAPI"
 
 async def zodiac(question, message):
     random.seed()
     x = random.randint(0, 2)
     if(x == 0):
         await message.channel.send("Yes!")
-        print('yes')
+        # print('yes')
     else:
         if(x == 1):
             await message.channel.send("No!")
-            print('no')
+            # print('no')
         else:
             await message.channel.send("IDK BRUH!")
-            print('idk')
+            # print('idk')
 
-    print('zodiac')
+    # print('zodiac')
 
 
 async def delete_message(message):
@@ -55,6 +60,58 @@ async def on_ready():
     print('Logged in as {0.user}'.format(client))
     print('Waiting')
 
+async def cb_message(message):
+    query = message.content.replace('<@!560284009469575169> ', '')
+    query = query.replace('<', '')
+    print('query: {}'.format(query))
+    response = cb.single_exchange(query)
+    # response = await send(query)
+    # await message.channel.send("{0} {1}".format(message.author.mention, response))
+    await message.reply(response)
+
+async def send(msg):
+    body = "stimulus=" + await encode(msg)
+    # for i in range(0, len(msg)):
+    #     body += '&vText' + (i + 2) + '=' + encodeForSending(this.messages[i]);
+    body += '&cb_settings_language=en'
+    body += '&cb_settings_scripting=no'
+    # if (this.internalId):
+    #     body += '&sessionid=' + this.internalId
+
+    body += '&islearning=1'
+    body += '&icognoid=wsf'
+    body += '&icognocheck=' + str(hashlib.md5(body[7:33].encode('utf-8')).hexdigest())
+
+    # print(body)
+
+    head = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:7.0.1) Gecko/20100101 Firefox/7.0",
+            "Referer": "https://www.cleverbot.com",
+            "Origin":  "https://www.cleverbot.com",
+            "Cookie": "XVIS=TEI939AFFIAGAYQZ"}
+    r = requests.post(url = URL, data = body, timeout = 5000, headers = head)
+
+    # print(urllib.parse.unquote(r.headers['CBOUTPUT']))
+    return urllib.parse.unquote(r.headers['CBOUTPUT'])
+
+async def encode(msg):
+    f = ""
+    d = ""
+    msg = msg.replace("/[|]/g", "{*}")
+
+    for i in msg:
+        if(ord(i) > 255):
+            d = repr(i)
+            if(d[0:2] == '%u'):
+                f += '|' + d[2:]
+            else:
+                f += d
+        else:
+            f += i
+        
+    f = f.replace('|201C', "'").replace('|201D', "'").replace('|2018', "'").replace('|2019', "'").replace('`', "'").replace('%B4', "'").replace('|FF20', '').replace('|FE6B', '')
+
+    # print(f)
+    return f
 
 @ client.event
 async def on_message(message):
@@ -77,20 +134,17 @@ async def on_message(message):
             message.content, message.author.name))
             
         # send cleverbot query
-        query = message.content.replace('<@!560284009469575169> ', '')
-        query = query.replace('<', '')
-        print('query: {}'.format(query))
-        response = cb.single_exchange(query)
-        # await message.channel.send("{0} {1}".format(message.author.mention, response))
-        await message.reply(response)
+        await cb_message(message)
 
     # uwuify
     if message.content.startswith('/uwu '):
         new_message = message.content.replace('/uwu ', '')
         # sanitize input
         new_message = new_message.replace('@everyone', '@\u200beveryone')
-        await message.channel.send(uwuify.uwu(new_message))
+
         await delete_message(message)
+        await message.channel.send(uwuify.uwu(new_message))
+        
 
     # only owner can run these >:)
     if(message.author.id == 217644900475338752):
@@ -143,21 +197,21 @@ async def on_message(message):
             await zodiac(op, message)
 
     
-
     # ping tool
     if message.content.startswith('.ping'):
         await message.channel.send("Pong!")
 
     # get bot's datetime
-    if ".time" in message.content:
+    if message.content.startswith('.time'):
         await message.channel.send('It\'s {0} PST'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
-        await message.channel.send(cb.single_exchange(message.content))
+        await cb_message(message)
+        # await message.channel.send(cb.single_exchange(message.content))
 
     # github link
-    if ".github" in message.content:
+    if message.content.startswith('.github'):
         await message.channel.send("https://github.com/AlbinoGiraffe/AlbinoBot")
 
 # @client.event
