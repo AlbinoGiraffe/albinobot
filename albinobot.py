@@ -136,6 +136,11 @@ async def on_message(message):
         # send cleverbot query
         await cb_message(message)
 
+    if message.content.startswith('/pdf'):
+        dad = await client.fetch_user(654564428150472714)
+        await message.channel.send("{} pdf file 😳".format(dad.mention))
+        await delete_message(message)
+
     # uwuify
     if message.content.startswith('/uwu '):
         new_message = message.content.replace('/uwu ', '')
