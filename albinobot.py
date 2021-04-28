@@ -8,7 +8,7 @@ import requests
 import re
 import hashlib
 import urllib.parse
-import cleverbotfree.cbfree
+# import cleverbotfree.cbfree
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
@@ -18,7 +18,7 @@ intents.reactions = True
 client = discord.Client()
 
 load_dotenv()
-cb = cleverbotfree.cbfree.Cleverbot()
+# cb = cleverbotfree.cbfree.Cleverbot()
 discord_token = os.getenv("DISCORD_TOKEN")
 # print(discord_token)
 
@@ -61,12 +61,21 @@ async def on_ready():
     print('Waiting')
 
 async def cb_message(message):
+
+    cb.browser.get(cb.url)
+    
     query = message.content.replace('<@!560284009469575169> ', '')
     query = query.replace('<', '')
     print('query: {}'.format(query))
-    response = cb.single_exchange(query)
+
+    cb.get_form()
+    cb.send_input(query)
+    cb.browser.close()
+    response = cb.get_response()
+
+    # response = cb.single_exchange(query)
     # response = await send(query)
-    # await message.channel.send("{0} {1}".format(message.author.mention, response))
+    await message.channel.send("{0} {1}".format(message.author.mention, response))
     await message.reply(response)
 
 async def send(msg):
@@ -134,12 +143,8 @@ async def on_message(message):
             message.content, message.author.name))
             
         # send cleverbot query
-        await cb_message(message)
-
-    if message.content.startswith('/pdf'):
-        dad = await client.fetch_user(654564428150472714)
-        await message.channel.send("{} pdf file 😳".format(dad.mention))
-        await delete_message(message)
+        # await cb_message(message)
+        await message.channel.send("Hi {}, i'm useless!".format(message.author.mention))
 
     # uwuify
     if message.content.startswith('/uwu '):
@@ -201,7 +206,6 @@ async def on_message(message):
             # await message.channel.send("it brokey!")
             await zodiac(op, message)
 
-    
     # ping tool
     if message.content.startswith('.ping'):
         await message.channel.send("Pong!")
@@ -212,12 +216,19 @@ async def on_message(message):
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
-        await cb_message(message)
+        # await cb_message(message)
         # await message.channel.send(cb.single_exchange(message.content))
+        await message.channel.send("hello, i dont do anything anymore")
 
     # github link
     if message.content.startswith('.github'):
         await message.channel.send("https://github.com/AlbinoGiraffe/AlbinoBot")
+
+    # the funny
+    if message.content.startswith('/pdf'):
+        dad = await client.fetch_user(654564428150472714)
+        await message.channel.send("{} pdf file 😳".format(dad.mention))
+        await delete_message(message)
 
 # @client.event
 # async def on_message_delete(message):
