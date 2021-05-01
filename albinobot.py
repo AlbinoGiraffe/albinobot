@@ -5,7 +5,7 @@ import sys
 import os
 import random
 
-from dotenv import load_dotenv
+import dotenv
 from discord.ext import commands
 
 intents = discord.Intents.default()
@@ -13,11 +13,14 @@ intents.typing = True
 intents.presences = False
 intents.reactions = True
 
-bot = discord.Client()
-bot = commands.Bot(command_prefix='.')
+dotenv_file = dotenv.find_dotenv()
+dotenv.load_dotenv(dotenv_file)
 
-load_dotenv()
 discord_token = os.getenv("DISCORD_TOKEN")
+c_prefix = os.getenv("PREFIX")
+
+bot = discord.Client()
+bot = commands.Bot(command_prefix=c_prefix)
 
 def check_user(ctx):
     # print("owner check: ({})".format(ctx.message.author.id))
@@ -25,21 +28,30 @@ def check_user(ctx):
 
 async def delete_message(message):
     try:
-        if(not message.author == bot.user):
+        # if(not message.author == bot.user):
             await message.delete()
     except:
-        print("No Perms!")
+        print("Cannot Delete '{}' NO PERMS".format(message.content))
         # await message.channel.send("Missing Permissions!")
 
-@ bot.command(pass_context = True)
+@ bot.command(name="cp")
+@ commands.check(check_user)
+async def set_command_pref(ctx, n: str):
+    bot.command_prefix = n
+    dotenv.set_key(dotenv_file, "PREFIX", n)
+    await ctx.send("New prefix is: {}".format(n))
+
+@ bot.command()
 @ commands.check(check_user)
 async def reply(ctx, id: int, *args):
     await ctx.trigger_typing()
     # print("reply")
     msg = ' '.join(args)
-    await delete_message(ctx.message)
+    # sanitize
+    msg = msg.replace('@everyone', '@\u200beveryone')
     m = await ctx.fetch_message(id)
     await m.reply(msg)
+    await delete_message(ctx.message)
 
 @ bot.command()
 @ commands.check(check_user)
@@ -62,7 +74,8 @@ async def delete(ctx, n: int):
         print('Deleted \'{0}\''.format(m.content))
         await m.delete()
     print("done deleting ({} messages)".format(numDeleted))
-
+    ctx.send("Done deleting ({} messages)".format(numDeleted))
+    
 # make bot say something
 @ bot.command()
 @ commands.check(check_user)
@@ -139,14 +152,12 @@ async def on_ready():
 
 @ bot.event
 async def on_message(message):
-    await bot.process_commands(message)
-    
     # check for recursion 
     if message.author == bot.user:
         return
 
     # log messages
-    if hasattr(message, 'name'):
+    if hasattr(message, 'channel'):
         if 'logs' not in message.channel.name:
             print('New Message: {0}, Channel: {1}, User: {2}'.format(
                 message.content, message.channel.name, message.author.name))
@@ -166,12 +177,9 @@ async def on_message(message):
     # only owner can run these >:)
     if(message.author.id == 217644900475338752):
         # clear bot messages
-        
-        
         if message.content.startswith('.kill'):
             pass
 
-    
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
         # await cb_message(message)
