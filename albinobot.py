@@ -4,128 +4,145 @@ import discord
 import sys
 import os
 import random
-import requests
-import re
-import hashlib
-import urllib.parse
-# import cleverbotfree.cbfree
+
 from dotenv import load_dotenv
+from discord.ext import commands
 
 intents = discord.Intents.default()
 intents.typing = True
 intents.presences = False
 intents.reactions = True
-client = discord.Client()
+
+bot = discord.Client()
+bot = commands.Bot(command_prefix='.')
 
 load_dotenv()
-# cb = cleverbotfree.cbfree.Cleverbot()
 discord_token = os.getenv("DISCORD_TOKEN")
-# print(discord_token)
 
-URL = "https://www.cleverbot.com/webservicemin?uc=UseOfficialCleverbotAPI"
-
-async def zodiac(question, message):
-    random.seed()
-    x = random.randint(0, 2)
-    if(x == 0):
-        await message.channel.send("Yes!")
-        # print('yes')
-    else:
-        if(x == 1):
-            await message.channel.send("No!")
-            # print('no')
-        else:
-            await message.channel.send("IDK BRUH!")
-            # print('idk')
-
-    # print('zodiac')
-
+def check_user(ctx):
+    # print("owner check: ({})".format(ctx.message.author.id))
+    return (ctx.message.author.id == 217644900475338752)
 
 async def delete_message(message):
     try:
-        if(not message.author == client.user):
+        if(not message.author == bot.user):
             await message.delete()
     except:
         print("No Perms!")
         # await message.channel.send("Missing Permissions!")
 
+@ bot.command(pass_context = True)
+@ commands.check(check_user)
+async def reply(ctx, id: int, *args):
+    await ctx.trigger_typing()
+    # print("reply")
+    msg = ' '.join(args)
+    await delete_message(ctx.message)
+    m = await ctx.fetch_message(id)
+    await m.reply(msg)
 
-@ client.event
+@ bot.command()
+@ commands.check(check_user)
+async def clear(ctx):
+    await delete_message(ctx.message)
+    async for m in ctx.message.channel.history(limit=200):
+        if(m.author == bot.user):
+            await m.delete()
+            print('Deleted \"{0}\"'.format(m.content))
+
+# delete x number of messages
+@ bot.command()
+@ commands.check(check_user)
+async def delete(ctx, n: int):
+    numDeleted = 0
+    await delete_message(ctx.message)
+
+    async for m in ctx.message.channel.history(limit=n):
+        numDeleted += 1
+        print('Deleted \'{0}\''.format(m.content))
+        await m.delete()
+    print("done deleting ({} messages)".format(numDeleted))
+
+# make bot say something
+@ bot.command()
+@ commands.check(check_user)
+async def say(ctx, *args):
+    await ctx.trigger_typing()
+    new_message = ' '.join(args)
+    # sanitize input
+    new_message = new_message.replace('@everyone', '@\u200beveryone')
+    await delete_message(ctx.message)
+    await ctx.send(new_message)
+
+# RNG bot
+@ bot.command(name='gb')
+async def zodiac(ctx, *args):
+    await ctx.trigger_typing()
+    random.seed()
+    x = random.randint(0, 2)
+    if(x == 0):
+        await ctx.message.channel.send("Yes!")
+        # print('yes')
+    else:
+        if(x == 1):
+            await ctx.message.channel.send("No!")
+            # print('no')
+        else:
+            await ctx.message.channel.send("IDK BRUH!")
+            # print('idk')
+
+# ping tool
+@ bot.command()
+async def ping(ctx):
+    await ctx.trigger_typing()
+    await ctx.send("Pong!")
+
+# get bot's datetime
+@ bot.command()
+async def time(ctx):
+    await ctx.trigger_typing()
+    await ctx.send('It\'s {0} PST'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
+
+# github link
+@ bot.command()
+async def github(ctx):
+    await ctx.trigger_typing()
+    await ctx.send("https://github.com/AlbinoGiraffe/AlbinoBot")
+
+# the funny
+@ bot.command()
+async def pdf(ctx):
+    await ctx.trigger_typing()
+    dad = await bot.fetch_user(654564428150472714)
+    await ctx.send("{} pdf file 😳".format(dad.mention))
+    await delete_message(ctx.message)
+
+# uwuifier
+@ bot.command()
+async def uwu(ctx, *args):
+    await ctx.trigger_typing()
+    new_message = ' '.join(args)
+    # sanitize input
+    new_message = new_message.replace('@everyone', '@\u200beveryone')
+
+    await delete_message(ctx.message)
+    await ctx.send(uwuify.uwu(new_message))
+    
+@ bot.event
 async def on_connect():
     print('Bot connected')
 
-
-@ client.event
+@ bot.event
 async def on_ready():
-    print('Logged in as {0.user}'.format(client))
+    print('Logged in as {0.user}'.format(bot))
     print('Waiting')
 
-async def cb_message(message):
-
-    cb.browser.get(cb.url)
-    
-    query = message.content.replace('<@!560284009469575169> ', '')
-    query = query.replace('<', '')
-    print('query: {}'.format(query))
-
-    cb.get_form()
-    cb.send_input(query)
-    cb.browser.close()
-    response = cb.get_response()
-
-    # response = cb.single_exchange(query)
-    # response = await send(query)
-    await message.channel.send("{0} {1}".format(message.author.mention, response))
-    await message.reply(response)
-
-async def send(msg):
-    body = "stimulus=" + await encode(msg)
-    # for i in range(0, len(msg)):
-    #     body += '&vText' + (i + 2) + '=' + encodeForSending(this.messages[i]);
-    body += '&cb_settings_language=en'
-    body += '&cb_settings_scripting=no'
-    # if (this.internalId):
-    #     body += '&sessionid=' + this.internalId
-
-    body += '&islearning=1'
-    body += '&icognoid=wsf'
-    body += '&icognocheck=' + str(hashlib.md5(body[7:33].encode('utf-8')).hexdigest())
-
-    # print(body)
-
-    head = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:7.0.1) Gecko/20100101 Firefox/7.0",
-            "Referer": "https://www.cleverbot.com",
-            "Origin":  "https://www.cleverbot.com",
-            "Cookie": "XVIS=TEI939AFFIAGAYQZ"}
-    r = requests.post(url = URL, data = body, timeout = 5000, headers = head)
-
-    # print(urllib.parse.unquote(r.headers['CBOUTPUT']))
-    return urllib.parse.unquote(r.headers['CBOUTPUT'])
-
-async def encode(msg):
-    f = ""
-    d = ""
-    msg = msg.replace("/[|]/g", "{*}")
-
-    for i in msg:
-        if(ord(i) > 255):
-            d = repr(i)
-            if(d[0:2] == '%u'):
-                f += '|' + d[2:]
-            else:
-                f += d
-        else:
-            f += i
-        
-    f = f.replace('|201C', "'").replace('|201D', "'").replace('|2018', "'").replace('|2019', "'").replace('`', "'").replace('%B4', "'").replace('|FF20', '').replace('|FE6B', '')
-
-    # print(f)
-    return f
-
-@ client.event
+@ bot.event
 async def on_message(message):
-    # check for recursion
-    if message.author == client.user:
+    await bot.process_commands(message)
+    
+    # check for recursion 
+    if message.author == bot.user:
         return
 
     # log messages
@@ -138,7 +155,7 @@ async def on_message(message):
             message.content, message.channel, message.author.name))
 
     # bot is mentioned
-    if client.user.mentioned_in(message):
+    if bot.user.mentioned_in(message):
         print('Mentioned: \'{0}\' {1}'.format(
             message.content, message.author.name))
             
@@ -146,90 +163,36 @@ async def on_message(message):
         # await cb_message(message)
         await message.channel.send("Hi {}, i'm useless!".format(message.author.mention))
 
-    # uwuify
-    if message.content.startswith('/uwu '):
-        new_message = message.content.replace('/uwu ', '')
-        # sanitize input
-        new_message = new_message.replace('@everyone', '@\u200beveryone')
-
-        await delete_message(message)
-        await message.channel.send(uwuify.uwu(new_message))
-        
-
     # only owner can run these >:)
     if(message.author.id == 217644900475338752):
         # clear bot messages
-        if message.content.startswith('/clear'):
-            await delete_message(message)
-            async for m in message.channel.history(limit=200):
-                if(m.author == client.user):
-                    await m.delete()
-                    print('Deleted {0}'.format(m.content))
-
-        # delete x number of messages
-        if message.content.startswith('/delete '):
-            numDeleted = 0
-            await delete_message(message)
-            op = message.content.replace('/delete ', '')
-            x = op.split()
-            if len(x) > 1:
-                print("/delete: incorrect number of args")
-                await message.channel.send("Parameter Error!")
-            else:
-                try:
-
-                    async for m in message.channel.history(limit=int(x[0])):
-                        numDeleted += 1
-                        print('Deleted \'{0}\''.format(m.content))
-                        await m.delete()
-                except:
-                    print("/delete: expected int but got {}".format(x[0]))
-                    await message.channel.send("Parameter Error!")
-            print("done deleting ({} messages)".format(numDeleted))
         
-        # make bot say something
-        if message.content.startswith('/say '):
-            new_message = message.content.replace('/say ', '')
-            # sanitize input
-            new_message = new_message.replace('@everyone', '@\u200beveryone')
-            await delete_message(message)
-            await message.channel.send(new_message)
+        
+        if message.content.startswith('.kill'):
+            pass
 
-    # RNG bot
-    if message.content.startswith('.gb '):
-        op = message.content.replace('.gb ', '')
-        if len(op) < 1:
-            print("zodiac: incorrect number of args")
-            # await message.channel.send("Parameter Error!")
-        else:
-            print('zodiac: message: {0}'.format(op))
-            # await message.channel.send("it brokey!")
-            await zodiac(op, message)
-
-    # ping tool
-    if message.content.startswith('.ping'):
-        await message.channel.send("Pong!")
-
-    # get bot's datetime
-    if message.content.startswith('.time'):
-        await message.channel.send('It\'s {0} PST'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
-
+    
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
         # await cb_message(message)
         # await message.channel.send(cb.single_exchange(message.content))
         await message.channel.send("hello, i dont do anything anymore")
+    
+@ bot.event
+async def on_command_error(ctx, err):
+    print("Error! ({})".format(err))
+    # await ctx.send("Reply error! ({})".format(err))    
 
-    # github link
-    if message.content.startswith('.github'):
-        await message.channel.send("https://github.com/AlbinoGiraffe/AlbinoBot")
+@bot.event
+async def on_raw_reaction_add(payload):
+    if payload.emoji.name == "📌":
+        channel = bot.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
+        if reaction and reaction.count >= 2:
+            await message.pin()
 
-    # the funny
-    if message.content.startswith('/pdf'):
-        dad = await client.fetch_user(654564428150472714)
-        await message.channel.send("{} pdf file 😳".format(dad.mention))
-        await delete_message(message)
-
+# message deleted         
 # @client.event
 # async def on_message_delete(message):
 #     if(message.guild.id == 760375168815071264):
@@ -240,10 +203,9 @@ async def on_message(message):
 #             # embed.add_field(name)
 #             embed.add_field(name="Message:", value=message.content, inline=True)
 #             embed.set_footer(text="id: {} | {} | #{}".format(message.id, message.created_at, message.channel.name))
-
-
 #             await channel.send(embed=embed)
 
+# message edited
 # @client.event
 # async def on_message_edit(before, after):
 #     if(after.guild.id == 760375168815071264):
@@ -253,21 +215,10 @@ async def on_message(message):
 #             embed = discord.Embed(title="Takyon edited a message", description="", color=0xe74c3c)
 #             # embed.add_field(name)
 #             embed.add_field(name="Before:", value=before.content, inline=True)
-#             embed.add_field(name="After:", value=after.content, inline=True)
-            
+#             embed.add_field(name="After:", value=after.content, inline=True)         
 #             embed.set_footer(text="{} | #{}".format(after.created_at, after.channel.name))
-            
-
 #             await channel.send(embed=embed)
 
-@client.event
-async def on_raw_reaction_add(payload):
-    if payload.emoji.name == "📌":
-        channel = client.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
-        if reaction and reaction.count >= 2:
-            await message.pin()
-        
 
-client.run(discord_token)
+        
+bot.run(discord_token)
