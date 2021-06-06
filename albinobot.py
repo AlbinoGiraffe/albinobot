@@ -22,6 +22,13 @@ c_prefix = os.getenv("PREFIX")
 bot = discord.Client()
 bot = commands.Bot(command_prefix=c_prefix)
 
+def init_gold():
+    if(os.path.exists("gold.txt")):
+        f = open("gold.txt")
+    else:
+        f = open("gold.txt", "a")
+    print(f.read().split(","))
+
 def check_user(ctx):
     # print("owner check: ({})".format(ctx.message.author.id))
     return (ctx.message.author.id == 217644900475338752)
@@ -142,6 +149,7 @@ async def uwu(ctx, *args):
     
 @ bot.event
 async def on_connect():
+    init_gold()
     print('Bot connected')
 
 @ bot.event
@@ -197,6 +205,10 @@ async def on_raw_reaction_add(payload):
         reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
         if reaction and reaction.count >= 2:
             await message.pin()
+
+    if payload.emoji.name == "🪙":
+        reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
+        
 
 # message deleted         
 # @client.event
