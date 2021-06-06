@@ -1,9 +1,12 @@
+from typing import DefaultDict
+from discord.embeds import EmptyEmbed
 import uwuify
 import datetime
 import discord
 import sys
 import os
 import random
+import csv
 
 import dotenv
 from discord.ext import commands
@@ -22,12 +25,53 @@ c_prefix = os.getenv("PREFIX")
 bot = discord.Client()
 bot = commands.Bot(command_prefix=c_prefix)
 
-def init_gold():
-    if(os.path.exists("gold.txt")):
-        f = open("gold.txt")
-    else:
-        f = open("gold.txt", "a")
-    print(f.read().split(","))
+def get_list():
+    if(os.path.exists("gold.csv")):
+        with open("gold.csv", newline='') as f:
+            # gold_board = list(csv.reader(f, delimiter=" ", quotechar="|"))
+            return list(csv.DictReader(f))
+            # print(list(gold_board))
+
+def check_board(id):
+    gold_board = get_list()
+    for row in gold_board:
+        # print("CSV_ID: ", row['MESSAGE_ID'], "\nDIS_ID: ", id)
+        if(int(row['MESSAGE_ID']) == id):
+            # print("EXISTS")
+            return row['BOARD_ID']
+
+    # print("NOT FOUND")
+    return None
+
+def delete_row(mid):
+    data = list()
+    with open("gold.csv", "r") as f:
+        reader = csv.reader(f)
+        for r in reader:
+            # print(r[0], ",", str(mid))
+            if(r[0] != str(mid)):
+                # print(list(r))
+                data.append(r)
+
+    with open("gold.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerows(data)
+
+def add_row(m, b):
+    with open("gold.csv", "a", newline='') as f:
+        fn = ['MESSAGE_ID', 'BOARD_ID']
+        writer = csv.DictWriter(f, fieldnames=fn)
+
+        writer.writerow({'MESSAGE_ID': m, 'BOARD_ID': b})
+
+def board_embed(message, reaction):
+    embed = discord.Embed(title=message.content, description="", color=0xe74c3c)
+    embed.add_field(name="Jump to Message", value="[Click]({})".format(message.jump_url))
+    embed.set_thumbnail(url=message.author.avatar_url)
+    timestamp = "{}/{}/{}".format(message.created_at.month, message.created_at.day, message.created_at.year)
+    embed.set_footer(text="golds: {} - {} - #{}".format(reaction.count, timestamp, message.channel.name))
+
+    return embed
 
 def check_user(ctx):
     # print("owner check: ({})".format(ctx.message.author.id))
@@ -79,7 +123,10 @@ async def delete(ctx, n: int):
     async for m in ctx.message.channel.history(limit=n):
         numDeleted += 1
         print('Deleted \'{0}\''.format(m.content))
-        await m.delete()
+        try:
+            await m.delete()
+        except:
+            print("Error while deleting message!")
     print("done deleting ({} messages)".format(numDeleted))
     
 # make bot say something
@@ -149,7 +196,6 @@ async def uwu(ctx, *args):
     
 @ bot.event
 async def on_connect():
-    init_gold()
     print('Bot connected')
 
 @ bot.event
@@ -197,8 +243,9 @@ async def on_command_error(ctx, err):
     print("Error! ({})".format(err))
     # await ctx.send("Reply error! ({})".format(err))    
 
-@bot.event
+@ bot.event
 async def on_raw_reaction_add(payload):
+    print("Reaction: {}".format(payload.emoji.name))
     if payload.emoji.name == "📌":
         channel = bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
@@ -206,9 +253,34 @@ async def on_raw_reaction_add(payload):
         if reaction and reaction.count >= 2:
             await message.pin()
 
-    if payload.emoji.name == "🪙":
+    if payload.emoji.name == "👍":
+        channel = bot.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
         reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
         
+        if reaction and reaction.count > 1:
+            board = discord.utils.get(channel.guild.channels, name="gold-board")
+            if(board.id == message.id):
+                return
+
+            board_id = check_board(message.id)
+            embed = board_embed(message, reaction)
+
+            if(board_id):
+                try:
+                    board_message = await board.fetch_message(board_id)
+                except:
+                    # message doesnt exist in board, update list
+                    # print("NOT FOUND IN CHANNEL")
+                    delete_row(message.id)
+                    board_message = await board.send(embed=embed)
+                    add_row(message.id, board_message.id)
+
+                await board_message.edit(embed=embed)
+            else:
+                board_message = await board.send(embed=embed)
+                add_row(message.id, board_message.id)
+
 
 # message deleted         
 # @client.event
@@ -238,5 +310,4 @@ async def on_raw_reaction_add(payload):
 #             await channel.send(embed=embed)
 
 
-        
 bot.run(discord_token)
