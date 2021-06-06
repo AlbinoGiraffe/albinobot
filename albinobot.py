@@ -74,7 +74,6 @@ async def delete(ctx, n: int):
         print('Deleted \'{0}\''.format(m.content))
         await m.delete()
     print("done deleting ({} messages)".format(numDeleted))
-    ctx.send("Done deleting ({} messages)".format(numDeleted))
     
 # make bot say something
 @ bot.command()
@@ -169,9 +168,6 @@ async def on_message(message):
     if bot.user.mentioned_in(message):
         print('Mentioned: \'{0}\' {1}'.format(
             message.content, message.author.name))
-            
-        # send cleverbot query
-        # await cb_message(message)
         await message.channel.send("Hi {}, i'm useless!".format(message.author.mention))
 
     # only owner can run these >:)
@@ -185,6 +181,8 @@ async def on_message(message):
         # await cb_message(message)
         # await message.channel.send(cb.single_exchange(message.content))
         await message.channel.send("hello, i dont do anything anymore")
+    
+    await bot.process_commands(message)
     
 @ bot.event
 async def on_command_error(ctx, err):
