@@ -132,4 +132,5 @@ dmypy.json
 .vscode/
 
 # Bot config/misc
-gold.txt
+# gold.txt
+.old/
