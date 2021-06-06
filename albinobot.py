@@ -5,7 +5,7 @@ import datetime
 import discord
 import os
 import random
-import goldboard as gb
+import starboard as sb
 import dotenv
 from discord.ext import commands
 
@@ -36,13 +36,13 @@ async def delete_message(message):
         print("Cannot Delete '{}' NO PERMS".format(message.content))
         # await message.channel.send("Missing Permissions!")
 
-# generate embed for gold board
+# generate embed for star board
 async def board_embed(message, reaction):
     embed = discord.Embed(title=message.content, description="", color=0xe74c3c)
     embed.add_field(name="Jump to Message", value="[Click]({})".format(message.jump_url))
     embed.set_thumbnail(url=message.author.avatar_url)
     timestamp = "{}/{}/{}".format(message.created_at.month, message.created_at.day, message.created_at.year)
-    embed.set_footer(text="golds: {} • {} • #{}".format(reaction.count, timestamp, message.channel.name))
+    embed.set_footer(text="stars: {} • {} • #{}".format(reaction.count, timestamp, message.channel.name))
 
     return embed
 
@@ -205,18 +205,18 @@ async def on_raw_reaction_add(payload):
         if reaction and reaction.count >= 2:
             await message.pin()
 
-    # gold board
-    if payload.emoji.name == "👍":
+    # star board
+    if payload.emoji.name == "⭐":
         channel = bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
         
-        if reaction and reaction.count >= 1:
-            board = discord.utils.get(channel.guild.channels, name="gold-board")
+        if reaction and reaction.count > 1:
+            board = discord.utils.get(channel.guild.channels, name="star-board")
             if(board.id == message.id):
                 return
 
-            board_id = await gb.check_board(message.id)
+            board_id = await sb.check_board(message.id)
             embed = await board_embed(message, reaction)
 
             if(board_id):
@@ -224,14 +224,14 @@ async def on_raw_reaction_add(payload):
                     board_message = await board.fetch_message(board_id)
                 except:
                     # message doesnt exist in board, update list
-                    await gb.delete_row(message.id)
+                    await sb.delete_row(message.id)
                     board_message = await board.send(embed=embed)
-                    await gb.add_row(message.id, board_message.id)
+                    await sb.add_row(message.id, board_message.id)
 
                 await board_message.edit(embed=embed)
             else:
                 board_message = await board.send(embed=embed)
-                await gb.add_row(message.id, board_message.id)
+                await sb.add_row(message.id, board_message.id)
 
     
 
