@@ -7,7 +7,10 @@ import os
 import random
 import starboard as sb
 import dotenv
+import time
 from discord.ext import commands
+
+start = time.time()
 
 intents = discord.Intents.default()
 intents.typing = True
@@ -124,8 +127,8 @@ async def ping(ctx):
     await ctx.send("Pong!")
 
 # get bot's datetime
-@ bot.command()
-async def time(ctx):
+@ bot.command(name="time")
+async def get_time(ctx):
     await ctx.trigger_typing()
     await ctx.send('It\'s {0} PST'.format(datetime.datetime.today().isoformat(' ', 'seconds')))
 
@@ -160,7 +163,9 @@ async def on_connect():
 
 @ bot.event
 async def on_ready():
+    end = time.time()
     print('Logged in as {0.user}'.format(bot))
+    print("Ready in", (end-start))
     print('Waiting')
 
 @ bot.event
