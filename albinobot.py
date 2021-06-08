@@ -210,14 +210,13 @@ async def on_raw_reaction_add(payload):
         channel = bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
-        
-        if reaction and reaction.count > 1:
-            board = discord.utils.get(channel.guild.channels, name="star-board")
-            if(board.id == message.id):
-                return
+        board = discord.utils.get(channel.guild.channels, name="star-board")
 
-            board_id = await sb.check_board(message.id)
-            embed = await board_embed(message, reaction)
+        if(channel.id == board.id):
+            return
+        if reaction and reaction.count > 1:
+            board_id = await sb.check_board(message.id) # check if message is already on board
+            embed = await board_embed(message, reaction) # generate embed
 
             if(board_id):
                 try:
@@ -230,6 +229,7 @@ async def on_raw_reaction_add(payload):
 
                 await board_message.edit(embed=embed)
             else:
+                # message not in board, update list
                 board_message = await board.send(embed=embed)
                 await sb.add_row(message.id, board_message.id)
 
