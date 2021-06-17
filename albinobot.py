@@ -22,13 +22,14 @@ dotenv.load_dotenv(dotenv_file)
 
 discord_token = os.getenv("DISCORD_TOKEN")
 c_prefix = os.getenv("PREFIX")
+admin_id = os.getenv("ADMIN_ID")
 
 bot = discord.Client()
 bot = commands.Bot(command_prefix=c_prefix)
 
 # check that user is bot owner
 async def check_user(ctx):
-    return (ctx.message.author.id == 217644900475338752)
+    return (ctx.message.author.id == admin_id)
 
 # delete a message
 async def delete_message(message):
@@ -83,17 +84,22 @@ async def clear(ctx):
 @ bot.command()
 @ commands.check(check_user)
 async def delete(ctx, n: int):
-    numDeleted = 0
+    # numDeleted = 0
     await delete_message(ctx.message)
-
+    delete_list = []
     async for m in ctx.message.channel.history(limit=n):
-        numDeleted += 1
-        print('Deleted \'{0}\''.format(m.content))
-        try:
-            await m.delete()
-        except:
-            print("Error while deleting message!")
-    print("done deleting ({} messages)".format(numDeleted))
+        # numDeleted += 1
+        # print('Deleted \'{0}\''.format(m.content))
+        # try:
+        #     await m.delete()
+        # except:
+        #     print("Error while deleting message!")
+        delete_list.append(m)
+    
+    await ctx.channel.delete_messages(delete_list)
+
+    # print("done deleting ({} messages)".format(numDeleted))
+    print("done deleting ({} messages)".format(len(delete_list)))
     
 # make bot say something
 @ bot.command()
@@ -216,7 +222,10 @@ async def on_raw_reaction_add(payload):
         message = await channel.fetch_message(payload.message_id)
         reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
         board = discord.utils.get(channel.guild.channels, name="star-board")
-
+        
+        print(channel.type)
+        if(isinstance(channel, discord.abc.PrivateChannel)):
+            return
         if(channel.id == board.id):
             return
         if reaction and reaction.count > 1:
