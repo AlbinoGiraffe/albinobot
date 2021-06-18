@@ -1,6 +1,7 @@
 from hashlib import new
 from typing import DefaultDict
 from discord.embeds import EmptyEmbed
+from discord.ext.commands.core import is_owner
 import uwuify
 import datetime
 import discord
@@ -26,12 +27,11 @@ c_prefix = os.getenv("PREFIX")
 admin_id = os.getenv("ADMIN_ID")
 
 bot = discord.Client()
-bot = commands.Bot(command_prefix=c_prefix)
+bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
-
-# check that user is bot owner
+# check that user is bot owner or admin
 async def check_user(ctx):
-    return (ctx.message.author.id == 217644900475338752)
+    return (ctx.message.author.id == int(bot.owner_id)) or ctx.message.author.guild_permissions.administrator
 
 
 # delete a message
@@ -102,17 +102,9 @@ async def delete(ctx, n: int):
     await delete_message(ctx.message)
     delete_list = []
     async for m in ctx.message.channel.history(limit=n):
-        # numDeleted += 1
-        # print('Deleted \'{0}\''.format(m.content))
-        # try:
-        #     await m.delete()
-        # except:
-        #     print("Error while deleting message!")
         delete_list.append(m)
 
     await ctx.channel.delete_messages(delete_list)
-
-    # print("done deleting ({} messages)".format(numDeleted))
     print("done deleting ({} messages)".format(len(delete_list)))
 
 
@@ -232,6 +224,8 @@ async def on_message(message):
 
     # emphasizes previous message
     if (message.content.lower() == "what"):
+        if(len(message.attachments) > 0):
+            return
         m = await message.channel.history(limit=2).flatten()
         new_msg = m[1].content
 
@@ -270,30 +264,32 @@ async def on_raw_reaction_add(payload):
                                      emoji=payload.emoji.name)
         board = discord.utils.get(channel.guild.channels, name="star-board")
 
-        print(channel.type)
         if (isinstance(channel, discord.abc.PrivateChannel)):
             return
-        if (channel.id == board.id):
-            return
-        if reaction and reaction.count > 1:
-            board_id = await sb.check_board(
-                message.id)  # check if message is already on board
-            embed = await board_embed(message, reaction)  # generate embed
+        if(board):
+            if (channel.id == board.id):
+                return
+            if reaction and reaction.count > 1:
+                board_id = await sb.check_board(
+                    message.id)  # check if message is already on board
+                embed = await board_embed(message, reaction)  # generate embed
 
-            if (board_id):
-                try:
-                    board_message = await board.fetch_message(board_id)
-                except:
-                    # message doesnt exist in board, update list
-                    await sb.delete_row(message.id)
+                if (board_id):
+                    try:
+                        board_message = await board.fetch_message(board_id)
+                    except:
+                        # message doesnt exist in board, update list
+                        await sb.delete_row(message.id)
+                        board_message = await board.send(embed=embed)
+                        await sb.add_row(message, board_message, reaction.count)
+
+                    await board_message.edit(embed=embed)
+                else:
+                    # message not in board, update list
                     board_message = await board.send(embed=embed)
-                    await sb.add_row(message.id, board_message.id)
-
-                await board_message.edit(embed=embed)
-            else:
-                # message not in board, update list
-                board_message = await board.send(embed=embed)
-                await sb.add_row(message.id, board_message.id)
+                    await sb.add_row(message, board_message, reaction.count)
+        else:
+            return
 
 
 # message deleted

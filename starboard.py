@@ -29,10 +29,10 @@ async def delete_row(mid):
         writer.writerows(data)
 
 # add message and board ids to list
-async def add_row(m, b):
+async def add_row(m, b, numStars):
     with open("stars.csv", "a", newline='') as f:
-        fn = ['MESSAGE_ID', 'BOARD_ID']
+        fn = ['MESSAGE_ID', 'BOARD_ID', 'SERVER_ID', 'STAR_COUNT']
         writer = csv.DictWriter(f, fieldnames=fn)
 
-        writer.writerow({'MESSAGE_ID': m, 'BOARD_ID': b})
+        writer.writerow({'MESSAGE_ID': m.id, 'BOARD_ID': b.id, 'SERVER_ID': m.guild.id, 'STAR_COUNT': numStars})
 

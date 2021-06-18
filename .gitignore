@@ -133,4 +133,5 @@ dmypy.json
 
 # Bot config/misc
 # gold.txt
+.log
 .old/
