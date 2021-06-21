@@ -69,7 +69,7 @@ async def board_embed(message, reaction):
 @commands.check(check_user)
 async def create_role(ctx, n: str):
     if (ctx.guild):
-        r = ctx.guild.create_role(name=n)
+        r = await ctx.guild.create_role(name=n)
         print("Deleted role: {}".format(r.name))
     else:
         return
