@@ -8,7 +8,7 @@ async def get_list():
         with open("stars.csv", newline='') as f:
             return list(csv.DictReader(f))
     else:
-        print("No Roles list!")
+        print("No Board list!")
         return
 
 

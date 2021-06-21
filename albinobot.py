@@ -64,28 +64,115 @@ async def board_embed(message, reaction):
     return embed
 
 
-## ROLE COMMANDS
+## ROLE FUNCTIONS
+async def find_role(ctx, n):
+    for r in ctx.guild.roles:
+        if n == str(r.name) or n == int(r.id):
+            return r
+    else:
+        return None
+
+
 @bot.command(name="rolecreate")
 @commands.check(check_user)
-async def create_role(ctx, n: str):
+async def create_role(ctx, *args):
     if (ctx.guild):
-        r = await ctx.guild.create_role(name=n)
-        print("Deleted role: {}".format(r.name))
+        r = await ctx.guild.create_role(name=' '.join(args))
+        print("Created role: {}".format(r.name))
+        await ctx.send("Created role: **{}**".format(r.name))
     else:
         return
 
 
 @bot.command(name="roledelete")
 @commands.check(check_user)
-async def create_role(ctx, n):
+async def delete_role(ctx, n):
     if (ctx.guild):
+        r = await find_role(ctx, n)
+        if (r):
+            print("Deleted role: {}".format(r.name))
+            await ctx.send("Deleted role: **{}**".format(r.name))
+            await r.delete()
+        else:
+            await ctx.send("Role **{}** not found!".format(n))
+
+
+@bot.command(name="rolelist")
+async def list_roles(ctx):
+    if (ctx.guild):
+        msg = "``` "
         for r in ctx.guild.roles:
-            if n == str(r.name) or n == int(r.id):
-                print("Deleted role: {}".format(r.name))
-                await r.delete()
-                return
+            if (not r.is_default()):
+                msg = msg + r.name + "\n"
+        msg = msg + "```"
+        await ctx.send("**Roles:**\n{}".format(msg))
     else:
         return
+
+
+@bot.command(name="roleadd")
+@commands.check(check_user)
+async def make_role_assignable(ctx, *args):
+    if (ctx.guild):
+        err = False
+        err_msg = ""
+        end_msg = ""
+        for role in args:
+            r = await find_role(ctx, role)
+            if (r):
+                print(r.name)
+                if (not await roles.is_assignable(r.id)):
+                    await roles.add_row(ctx, r)
+                end_msg = end_msg + r.name + ", "
+            else:
+                err = True
+                err_msg = err_msg + role + ", "
+
+        await ctx.send("Role(s) **{}** are now user-assignable".format(end_msg)
+                       )
+        if (err):
+            await ctx.send("Roles **{}** not found!".format(err_msg))
+
+
+@bot.command(name="roleremove")
+@commands.check(check_user)
+async def make_role_assignable(ctx, *args):
+    if (ctx.guild):
+        err = False
+        err_msg = ""
+        end_msg = ""
+        for role in args:
+            r = await find_role(ctx, role)
+            if (r):
+                await roles.delete_row(ctx, r)
+                end_msg = end_msg + r.name + ", "
+            else:
+                err = True
+                err_msg = err_msg + role + ", "
+
+        await ctx.send("Role(s) **{}** are now unassignable".format(end_msg))
+        if (err):
+            await ctx.send("Roles **{}** not found!".format(err_msg))
+
+
+@bot.command(name="rolegive")
+async def give_role(ctx, n):
+    if (ctx.guild):
+        r = await find_role(ctx, n)
+        if (r):
+            if await roles.is_assignable(r.id):
+                try:
+                    await ctx.author.add_roles(r)
+                except:
+                    await ctx.send("You can't have the **{}** role!".format(
+                        r.name))
+                    return
+                await ctx.send("You now have the **{}** role!".format(r.name))
+            else:
+                await ctx.send("You can't have the **{}** role!".format(r.name)
+                               )
+        else:
+            await ctx.send("Role **{}** not found!".format(n))
 
 
 # set command prefix eg. ".gb"
