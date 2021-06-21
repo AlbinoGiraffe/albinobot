@@ -1,13 +1,14 @@
 from hashlib import new
 from typing import DefaultDict
 from discord.embeds import EmptyEmbed
-from discord.ext.commands.core import is_owner
+from discord.ext.commands.core import guild_only, is_owner
 import uwuify
 import datetime
 import discord
 import os
 import random
 import starboard as sb
+import roles
 import dotenv
 import time
 from discord.ext import commands
@@ -29,9 +30,11 @@ admin_id = os.getenv("ADMIN_ID")
 bot = discord.Client()
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
+
 # check that user is bot owner or admin
 async def check_user(ctx):
-    return (ctx.message.author.id == int(bot.owner_id)) or ctx.message.author.guild_permissions.administrator
+    return (ctx.message.author.id == int(
+        bot.owner_id)) or ctx.message.author.guild_permissions.administrator
 
 
 # delete a message
@@ -59,6 +62,30 @@ async def board_embed(message, reaction):
         reaction.count, timestamp, message.channel.name))
 
     return embed
+
+
+## ROLE COMMANDS
+@bot.command(name="rolecreate")
+@commands.check(check_user)
+async def create_role(ctx, n: str):
+    if (ctx.guild):
+        r = ctx.guild.create_role(name=n)
+        print("Deleted role: {}".format(r.name))
+    else:
+        return
+
+
+@bot.command(name="roledelete")
+@commands.check(check_user)
+async def create_role(ctx, n):
+    if (ctx.guild):
+        for r in ctx.guild.roles:
+            if n == str(r.name) or n == int(r.id):
+                print("Deleted role: {}".format(r.name))
+                await r.delete()
+                return
+    else:
+        return
 
 
 # set command prefix eg. ".gb"
@@ -206,7 +233,8 @@ async def on_message(message):
         else:
             if 'logs' not in message.channel.name:
                 print('New Message: {0}, Channel: {1}, User: {2}'.format(
-                    message.content, message.channel.name, message.author.name))
+                    message.content, message.channel.name,
+                    message.author.name))
     else:
         print('New Message: {0}, Channel: {1}, User: {2}'.format(
             message.content, message.channel, message.author.name))
@@ -224,7 +252,7 @@ async def on_message(message):
 
     # emphasizes previous message
     if (message.content.lower() == "what"):
-        if(len(message.attachments) > 0):
+        if (len(message.attachments) > 0):
             return
         m = await message.channel.history(limit=2).flatten()
         new_msg = m[1].content
@@ -266,7 +294,7 @@ async def on_raw_reaction_add(payload):
 
         if (isinstance(channel, discord.abc.PrivateChannel)):
             return
-        if(board):
+        if (board):
             if (channel.id == board.id):
                 return
             if reaction and reaction.count > 1:
@@ -281,7 +309,8 @@ async def on_raw_reaction_add(payload):
                         # message doesnt exist in board, update list
                         await sb.delete_row(message.id)
                         board_message = await board.send(embed=embed)
-                        await sb.add_row(message, board_message, reaction.count)
+                        await sb.add_row(message, board_message,
+                                         reaction.count)
 
                     await board_message.edit(embed=embed)
                 else:
