@@ -46,3 +46,13 @@ async def add_row(m, r):
             'ROLE_ID': r.id,
             'ROLE_NAME': r.name,
         })
+
+
+async def get_assignable_roles():
+    role_list = list()
+    if (os.path.exists("roles.csv")):
+        with open("roles.csv", newline='') as f:
+            return list(csv.DictReader(f))
+    else:
+        print("No Roles list!")
+        return

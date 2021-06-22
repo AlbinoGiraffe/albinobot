@@ -73,7 +73,7 @@ async def gen_role_list(role_list, n):
     msg = "```"
     for r in role_list[n]:
         if (not r.is_default()):
-            msg = msg + r.name + "\n"
+            msg = msg + "\"" + r.name + "\"\n"
     msg = msg + "```"
     return msg
 
@@ -111,7 +111,7 @@ async def delete_role(ctx, n):
             await ctx.send("Role **{}** not found!".format(n))
 
 
-@bot.command(name="rolelist")
+@bot.command(name="rolelistall")
 async def list_roles(ctx, *args):
     if (ctx.guild):
         role_list = list(split_roles(ctx.guild.roles, 20))
@@ -127,6 +127,29 @@ async def list_roles(ctx, *args):
         msg = await gen_role_list(role_list, n)
         await ctx.send("**Roles (Page {}\{}):**\n{}".format(n+1, rs, msg))
 
+@bot.command(name="rolelist")
+@commands.check(check_user)
+async def list_assignable(ctx, *args):
+    if(ctx.guild):
+        role_list = await roles.get_assignable_roles()
+        role_list = list(split_roles(role_list, 10))
+        rs = len(role_list)
+        n = 0
+
+        if(len(args) == 1):
+            n = int(' '.join(args)) - 1
+            if(n > rs):
+                n = rs - 1
+            if(n < 0):
+                n = 0
+
+        msg = "```"
+        for row in role_list[n]:
+            if(int(row['SERVER_ID']) == int(ctx.guild.id)):
+                # print(row['ROLE_NAME'])
+                msg = msg + "\"" + row['ROLE_NAME'] + "\" \n"
+        msg = msg + "```"
+        await ctx.send("**Roles that can be self-assigned: (Page {}/{})**\n{}".format(n+1, rs, msg))
 
 @bot.command(name="roleadd")
 @commands.check(check_user)
@@ -135,10 +158,10 @@ async def make_role_assignable(ctx, *args):
         err = False
         err_msg = ""
         end_msg = ""
+
         for role in args:
             r = await find_role(ctx, role)
             if (r):
-                print(r.name)
                 if (not await roles.is_assignable(r.id)):
                     await roles.add_row(ctx, r)
                 end_msg = end_msg + r.name + ", "
@@ -159,6 +182,7 @@ async def make_role_assignable(ctx, *args):
         err = False
         err_msg = ""
         end_msg = ""
+        
         for role in args:
             r = await find_role(ctx, role)
             if (r):
@@ -246,7 +270,6 @@ async def clear(ctx):
 @bot.command()
 @commands.check(check_user)
 async def delete(ctx, n: int):
-    # numDeleted = 0
     await delete_message(ctx.message)
     delete_list = []
     async for m in ctx.message.channel.history(limit=n):
