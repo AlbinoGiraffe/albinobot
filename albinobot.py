@@ -16,9 +16,9 @@ from discord.ext import commands
 start = time.time()
 
 intents = discord.Intents.default()
-intents.typing = True
-intents.presences = False
-intents.reactions = True
+# intents.typing = True
+# intents.presences = False
+# intents.reactions = True
 
 dotenv_file = dotenv.find_dotenv()
 dotenv.load_dotenv(dotenv_file)
@@ -65,6 +65,18 @@ async def board_embed(message, reaction):
 
 
 ## ROLE FUNCTIONS
+def split_roles(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+async def gen_role_list(role_list, n):
+    msg = "```"
+    for r in role_list[n]:
+        if (not r.is_default()):
+            msg = msg + r.name + "\n"
+    msg = msg + "```"
+    return msg
+
 async def find_role(ctx, n):
     for r in ctx.guild.roles:
         if n == str(r.name) or n == int(r.id):
@@ -76,12 +88,14 @@ async def find_role(ctx, n):
 @bot.command(name="rolecreate")
 @commands.check(check_user)
 async def create_role(ctx, *args):
+    print("new")
     if (ctx.guild):
-        r = await ctx.guild.create_role(name=' '.join(args))
-        print("Created role: {}".format(r.name))
-        await ctx.send("Created role: **{}**".format(r.name))
-    else:
-        return
+        if(not await find_role(ctx, ' '.join(args))):
+            r = await ctx.guild.create_role(name=' '.join(args))
+            await ctx.send("Created role: **{}**".format(r.name))
+            print("Created role: {}".format(r.name))
+        else:
+            await ctx.send("Can't make duplicate role!")
 
 
 @bot.command(name="roledelete")
@@ -98,16 +112,20 @@ async def delete_role(ctx, n):
 
 
 @bot.command(name="rolelist")
-async def list_roles(ctx):
+async def list_roles(ctx, *args):
     if (ctx.guild):
-        msg = "``` "
-        for r in ctx.guild.roles:
-            if (not r.is_default()):
-                msg = msg + r.name + "\n"
-        msg = msg + "```"
-        await ctx.send("**Roles:**\n{}".format(msg))
-    else:
-        return
+        role_list = list(split_roles(ctx.guild.roles, 20))
+        rs = len(role_list)
+        n = 0
+        if(len(args) == 1):
+            n = int(' '.join(args)) - 1
+            if(n > rs):
+                n = rs - 1
+            if(n < 0):
+                n = 0
+
+        msg = await gen_role_list(role_list, n)
+        await ctx.send("**Roles (Page {}\{}):**\n{}".format(n+1, rs, msg))
 
 
 @bot.command(name="roleadd")
@@ -134,7 +152,7 @@ async def make_role_assignable(ctx, *args):
             await ctx.send("Roles **{}** not found!".format(err_msg))
 
 
-@bot.command(name="roleremove")
+@bot.command(name="roleunadd")
 @commands.check(check_user)
 async def make_role_assignable(ctx, *args):
     if (ctx.guild):
@@ -155,10 +173,26 @@ async def make_role_assignable(ctx, *args):
             await ctx.send("Roles **{}** not found!".format(err_msg))
 
 
-@bot.command(name="rolegive")
-async def give_role(ctx, n):
+@bot.command(name="roleremove")
+@commands.check(check_user)
+async def remove_role(ctx, *args):
     if (ctx.guild):
-        r = await find_role(ctx, n)
+        r = await find_role(ctx, ' '.join(args))
+        if (r):
+            try:
+                await ctx.author.remove_roles(r)
+            except:
+                await ctx.send("Error removing the **{}** role!".format(r.name))
+                return
+            await ctx.send("Removed the **{}** role!".format(r.name))
+        else:
+            await ctx.send("Role **{}** not found!".format(n))
+
+
+@bot.command(name="rolegive")
+async def give_role(ctx, *args):
+    if (ctx.guild):
+        r = await find_role(ctx, ' '.join(args))
         if (r):
             if await roles.is_assignable(r.id):
                 try:
@@ -172,7 +206,7 @@ async def give_role(ctx, n):
                 await ctx.send("You can't have the **{}** role!".format(r.name)
                                )
         else:
-            await ctx.send("Role **{}** not found!".format(n))
+            await ctx.send("Role **{}** not found!".format(' '.join(args)))
 
 
 # set command prefix eg. ".gb"
