@@ -85,7 +85,7 @@ async def find_role(ctx, n):
         return None
 
 
-@bot.command(name="rolecreate")
+@bot.command(name="rolecreate", help="Create a role")
 @commands.check(check_user)
 async def create_role(ctx, *args):
     print("new")
@@ -98,7 +98,7 @@ async def create_role(ctx, *args):
             await ctx.send("Can't make duplicate role!")
 
 
-@bot.command(name="roledelete")
+@bot.command(name="roledelete", help="Delete a role")
 @commands.check(check_user)
 async def delete_role(ctx, n):
     if (ctx.guild):
@@ -111,7 +111,7 @@ async def delete_role(ctx, n):
             await ctx.send("Role **{}** not found!".format(n))
 
 
-@bot.command(name="rolelistall")
+@bot.command(name="rolelistall", help="List all roles on the server")
 async def list_roles(ctx, *args):
     if (ctx.guild):
         role_list = list(split_roles(ctx.guild.roles, 20))
@@ -127,7 +127,7 @@ async def list_roles(ctx, *args):
         msg = await gen_role_list(role_list, n)
         await ctx.send("**Roles (Page {}\{}):**\n{}".format(n+1, rs, msg))
 
-@bot.command(name="rolelist")
+@bot.command(name="rolelist", help="List all addable roles")
 @commands.check(check_user)
 async def list_assignable(ctx, *args):
     if(ctx.guild):
@@ -151,7 +151,7 @@ async def list_assignable(ctx, *args):
         msg = msg + "```"
         await ctx.send("**Roles that can be self-assigned: (Page {}/{})**\n{}".format(n+1, rs, msg))
 
-@bot.command(name="roleadd")
+@bot.command(name="roleadd", help="Add a self-assignable role")
 @commands.check(check_user)
 async def make_role_assignable(ctx, *args):
     if (ctx.guild):
@@ -175,7 +175,7 @@ async def make_role_assignable(ctx, *args):
             await ctx.send("Roles **{}** not found!".format(err_msg))
 
 
-@bot.command(name="roleunadd")
+@bot.command(name="roleunadd", help="Remove a self-assignable role")
 @commands.check(check_user)
 async def make_role_assignable(ctx, *args):
     if (ctx.guild):
@@ -197,7 +197,7 @@ async def make_role_assignable(ctx, *args):
             await ctx.send("Roles **{}** not found!".format(err_msg))
 
 
-@bot.command(name="roleremove")
+@bot.command(name="roleremove", help="Remove a role from yourself")
 @commands.check(check_user)
 async def remove_role(ctx, *args):
     if (ctx.guild):
@@ -213,7 +213,7 @@ async def remove_role(ctx, *args):
             await ctx.send("Role **{}** not found!".format(n))
 
 
-@bot.command(name="rolegive")
+@bot.command(name="rolegive", help="Give yourself a role")
 async def give_role(ctx, *args):
     if (ctx.guild):
         r = await find_role(ctx, ' '.join(args))
@@ -234,7 +234,7 @@ async def give_role(ctx, *args):
 
 
 # set command prefix eg. ".gb"
-@bot.command(name="cp")
+@bot.command(name="cp", help="Change a command prefix")
 @commands.check(check_user)
 async def set_command_pref(ctx, n: str):
     bot.command_prefix = n
@@ -243,7 +243,7 @@ async def set_command_pref(ctx, n: str):
 
 
 # reply to a message given it's id (must be in same channel)
-@bot.command()
+@bot.command(help="Make bot reply to a message ID")
 @commands.check(check_user)
 async def reply(ctx, id: int, *args):
     await ctx.trigger_typing()
@@ -256,7 +256,7 @@ async def reply(ctx, id: int, *args):
 
 
 # clear bot messages
-@bot.command()
+@bot.command(help="Clear bot messages")
 @commands.check(check_user)
 async def clear(ctx):
     await delete_message(ctx.message)
@@ -267,7 +267,7 @@ async def clear(ctx):
 
 
 # delete x number of messages
-@bot.command()
+@bot.command(help="Bulk delete messages")
 @commands.check(check_user)
 async def delete(ctx, n: int):
     await delete_message(ctx.message)
@@ -280,7 +280,7 @@ async def delete(ctx, n: int):
 
 
 # make bot say something
-@bot.command()
+@bot.command(help="Make bot say something")
 @commands.check(check_user)
 async def say(ctx, *args):
     await ctx.trigger_typing()
@@ -292,7 +292,7 @@ async def say(ctx, *args):
 
 
 # uwuifier
-@bot.command()
+@bot.command(help="UWUify a message")
 @commands.check(check_user)
 async def uwu(ctx, *args):
     await ctx.trigger_typing()
@@ -305,7 +305,7 @@ async def uwu(ctx, *args):
 
 
 # RNG bot
-@bot.command(name='gb')
+@bot.command(name='gb', help="Pick something")
 async def zodiac(ctx, *args):
     await ctx.trigger_typing()
     random.seed()
@@ -320,14 +320,14 @@ async def zodiac(ctx, *args):
 
 
 # ping tool
-@bot.command()
+@bot.command(help="Ping the bot")
 async def ping(ctx):
     await ctx.trigger_typing()
     await ctx.send("Pong!")
 
 
 # get bot's datetime
-@bot.command(name="time")
+@bot.command(name="time", help="Get bot's time")
 async def get_time(ctx):
     await ctx.trigger_typing()
     await ctx.send('It\'s {0} PST'.format(datetime.datetime.today().isoformat(
@@ -335,14 +335,14 @@ async def get_time(ctx):
 
 
 # github link
-@bot.command()
+@bot.command(help="Get bot's github link")
 async def github(ctx):
     await ctx.trigger_typing()
     await ctx.send("https://github.com/AlbinoGiraffe/AlbinoBot")
 
 
 # the funny
-@bot.command()
+@bot.command(help="the funny")
 async def pdf(ctx):
     await ctx.trigger_typing()
     dad = await bot.fetch_user(654564428150472714)
@@ -472,7 +472,7 @@ async def on_raw_reaction_add(payload):
 #         print("message deleted ({}): {}".format(message.author.name, message.content))
 #         if(message.author.id == 670058949709529094):
 #             channel = client.get_channel(829165070734327858)
-#             embed = discord.Embed(title="Takyon deleted a message", description="", color=0xe74c3c)
+#             embed = discord.Embed(title="Takyon deleted a message", help="", color=0xe74c3c)
 #             # embed.add_field(name)
 #             embed.add_field(name="Message:", value=message.content, inline=True)
 #             embed.set_footer(text="id: {} | {} | #{}".format(message.id, message.created_at, message.channel.name))
@@ -485,7 +485,7 @@ async def on_raw_reaction_add(payload):
 #         print("message edited ({}): before: {}, after: {}".format(before.author.name, before.content, after.content))
 #         if(after.author.id == 670058949709529094):
 #             channel = client.get_channel(829165070734327858)
-#             embed = discord.Embed(title="Takyon edited a message", description="", color=0xe74c3c)
+#             embed = discord.Embed(title="Takyon edited a message", help="", color=0xe74c3c)
 #             # embed.add_field(name)
 #             embed.add_field(name="Before:", value=before.content, inline=True)
 #             embed.add_field(name="After:", value=after.content, inline=True)
