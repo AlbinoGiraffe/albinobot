@@ -1,6 +1,7 @@
 from hashlib import new
 from typing import DefaultDict
 from discord.embeds import EmptyEmbed
+from discord.errors import InvalidArgument
 from discord.ext.commands.core import guild_only, is_owner
 import uwuify
 import datetime
@@ -11,6 +12,7 @@ import starboard as sb
 import roles
 import dotenv
 import time
+import re
 from discord.ext import commands
 
 start = time.time()
@@ -69,6 +71,7 @@ def split_roles(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
+
 async def gen_role_list(role_list, n):
     msg = "```"
     for r in role_list[n]:
@@ -76,6 +79,7 @@ async def gen_role_list(role_list, n):
             msg = msg + "\"" + r.name + "\"\n"
     msg = msg + "```"
     return msg
+
 
 async def find_role(ctx, n):
     for r in ctx.guild.roles:
@@ -85,12 +89,49 @@ async def find_role(ctx, n):
         return None
 
 
+@bot.command(name="roleedit", help="Add a self-assignable role")
+@commands.check(check_user)
+async def edit_role_assignable(ctx, n, c, *args):
+    if (ctx.guild):
+        err = False
+        end = False
+        err_msg = ''
+        end_msg = ''
+
+        for role in args:
+            r = await find_role(ctx, role)
+            if(r):
+                if (n == 'color'):
+                    if not (re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', c)
+                                or re.search(r'^(?:[0-9a-fA-F]{3}){1,2}$', c)):
+                        await ctx.send("**{}** is not valid color code!".format(c))
+                        return
+                    else:
+                        x = c.lstrip('#')
+                        try:
+                            await r.edit(color=int(x, 16))
+                            end = True
+                            end_msg = end_msg + r.name + ", "
+                        except:
+                            await ctx.send("Error changing color! (Missing permissions?)")
+            else:
+                err = True
+                err_msg = err_msg + role + ", "
+    
+    if(end):
+        await ctx.send("Colors for role(s) **{}** changed to **{}**".format(end_msg, x))
+
+    if (err):
+        await ctx.send("Role(s) **{}** not found!".format(err_msg))
+                
+
+
 @bot.command(name="rolecreate", help="Create a role")
 @commands.check(check_user)
 async def create_role(ctx, *args):
     print("new")
     if (ctx.guild):
-        if(not await find_role(ctx, ' '.join(args))):
+        if (not await find_role(ctx, ' '.join(args))):
             r = await ctx.guild.create_role(name=' '.join(args))
             await ctx.send("Created role: **{}**".format(r.name))
             print("Created role: {}".format(r.name))
@@ -117,45 +158,50 @@ async def list_roles(ctx, *args):
         role_list = list(split_roles(ctx.guild.roles, 20))
         rs = len(role_list)
         n = 0
-        if(len(args) == 1):
+        if (len(args) == 1):
             n = int(' '.join(args)) - 1
-            if(n > rs):
+            if (n > rs):
                 n = rs - 1
-            if(n < 0):
+            if (n < 0):
                 n = 0
 
         msg = await gen_role_list(role_list, n)
-        await ctx.send("**Roles (Page {}\{}):**\n{}".format(n+1, rs, msg))
+        await ctx.send("**Roles (Page {}\{}):**\n{}".format(n + 1, rs, msg))
+
 
 @bot.command(name="rolelist", help="List all addable roles")
 @commands.check(check_user)
 async def list_assignable(ctx, *args):
-    if(ctx.guild):
+    if (ctx.guild):
         role_list = await roles.get_assignable_roles()
         role_list = list(split_roles(role_list, 10))
         rs = len(role_list)
         n = 0
 
-        if(len(args) == 1):
+        if (len(args) == 1):
             n = int(' '.join(args)) - 1
-            if(n > rs):
+            if (n > rs):
                 n = rs - 1
-            if(n < 0):
+            if (n < 0):
                 n = 0
 
         msg = "```"
         for row in role_list[n]:
-            if(int(row['SERVER_ID']) == int(ctx.guild.id)):
+            if (int(row['SERVER_ID']) == int(ctx.guild.id)):
                 # print(row['ROLE_NAME'])
                 msg = msg + "\"" + row['ROLE_NAME'] + "\" \n"
         msg = msg + "```"
-        await ctx.send("**Roles that can be self-assigned: (Page {}/{})**\n{}".format(n+1, rs, msg))
+        await ctx.send(
+            "**Roles that can be self-assigned: (Page {}/{})**\n{}".format(
+                n + 1, rs, msg))
+
 
 @bot.command(name="roleadd", help="Add a self-assignable role")
 @commands.check(check_user)
 async def make_role_assignable(ctx, *args):
     if (ctx.guild):
         err = False
+        end = False
         err_msg = ""
         end_msg = ""
 
@@ -164,12 +210,15 @@ async def make_role_assignable(ctx, *args):
             if (r):
                 if (not await roles.is_assignable(r.id)):
                     await roles.add_row(ctx, r)
-                end_msg = end_msg + r.name + ", "
+                    
+                    end = True
+                    end_msg = end_msg + r.name + ", "
             else:
                 err = True
                 err_msg = err_msg + role + ", "
-
-        await ctx.send("Role(s) **{}** are now user-assignable".format(end_msg)
+        
+        if(end):
+            await ctx.send("Role(s) **{}** are now user-assignable".format(end_msg)
                        )
         if (err):
             await ctx.send("Roles **{}** not found!".format(err_msg))
@@ -182,7 +231,7 @@ async def make_role_assignable(ctx, *args):
         err = False
         err_msg = ""
         end_msg = ""
-        
+
         for role in args:
             r = await find_role(ctx, role)
             if (r):
@@ -206,14 +255,15 @@ async def remove_role(ctx, *args):
             try:
                 await ctx.author.remove_roles(r)
             except:
-                await ctx.send("Error removing the **{}** role!".format(r.name))
+                await ctx.send("Error removing the **{}** role!".format(r.name)
+                               )
                 return
             await ctx.send("Removed the **{}** role!".format(r.name))
         else:
             await ctx.send("Role **{}** not found!".format(n))
 
 
-@bot.command(name="rolegive", help="Give yourself a role")
+@bot.command(name="iam", help="Give yourself a role")
 async def give_role(ctx, *args):
     if (ctx.guild):
         r = await find_role(ctx, ' '.join(args))
