@@ -74,3 +74,6 @@ Get bot github link
 
 Send uwuified message:
 > .uwu \<message text>
+
+Get the Urban Dictionaru defintion of a word:
+> .ud \<word>

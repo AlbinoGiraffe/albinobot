@@ -6,6 +6,7 @@ from discord.ext.commands.core import guild_only, is_owner
 import uwuify
 import datetime
 import discord
+import urbandict
 import os
 import random
 import starboard as sb
@@ -155,7 +156,7 @@ async def delete_role(ctx, n):
 @bot.command(name="rolelistall", help="List all roles on the server")
 async def list_roles(ctx, *args):
     if (ctx.guild):
-        role_list = list(split_roles(ctx.guild.roles, 20))
+        role_list = list(split_roles(ctx.guild.roles, 10))
         rs = len(role_list)
         n = 0
         if (len(args) == 1):
@@ -281,6 +282,21 @@ async def give_role(ctx, *args):
         else:
             await ctx.send("Role **{}** not found!".format(' '.join(args)))
 
+## END ROLE COMMANDS
+
+# Urban Dictionary
+@bot.command(name="ud", help="Get an urdban dictionary definition")
+async def urban_define(ctx, *args):
+    try:
+        defs = urbandict.define(' '.join(args))
+        result = defs[0]
+        embd = discord.Embed(title=result['word'], description=result['def'],color=0xe74c3c)
+        embd.set_footer(text="Example: "+result['example'])
+        await ctx.send(embed=embd)
+    except:
+        embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
+        await ctx.send(embed=embd)
+    
 
 # set command prefix eg. ".gb"
 @bot.command(name="cp", help="Change a command prefix")
