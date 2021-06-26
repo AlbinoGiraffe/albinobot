@@ -77,3 +77,7 @@ Send uwuified message:
 
 Get the Urban Dictionaru defintion of a word:
 > .ud \<word>
+
+---
+
+## Role Commands
