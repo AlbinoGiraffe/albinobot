@@ -89,7 +89,7 @@ async def find_role(ctx, n):
         return None
 
 
-@bot.command(name="roleedit", help="Add a self-assignable role")
+@bot.command(name="roleedit", help="Edit a role")
 @commands.check(check_user)
 async def edit_role_assignable(ctx, n, c, *args):
     if (ctx.guild):
