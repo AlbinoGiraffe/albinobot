@@ -208,11 +208,10 @@ async def make_role_assignable(ctx, *args):
         for role in args:
             r = await find_role(ctx, role)
             if (r):
-                if (not await roles.is_assignable(r.id)):
-                    await roles.add_row(ctx, r)
-                    
-                    end = True
-                    end_msg = end_msg + r.name + ", "
+                await roles.add_row(ctx, r)
+                
+                end = True
+                end_msg = end_msg + r.name + ", "
             else:
                 err = True
                 err_msg = err_msg + role + ", "
