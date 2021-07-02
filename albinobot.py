@@ -6,7 +6,7 @@ from discord.ext.commands.core import guild_only, is_owner
 import uwuify
 import datetime
 import discord
-import urbandict
+
 import os
 import random
 import starboard as sb
@@ -15,8 +15,11 @@ import dotenv
 import time
 import re
 from discord.ext import commands
+from udpy import UrbanClient
+# import urbandict
 
 start = time.time()
+ud_client = UrbanClient()
 
 intents = discord.Intents.default()
 # intents.typing = True
@@ -120,7 +123,9 @@ async def edit_role_assignable(ctx, n, c, *args):
                 err_msg = err_msg + role + ", "
     
     if(end):
-        await ctx.send("Colors for role(s) **{}** changed to **{}**".format(end_msg, x))
+        embd = discord.Embed(description="Colors for role(s) **{}** changed to **{}**".format(end_msg, x), color=int(x, 16))
+        await ctx.send(embed=embd)
+        # await ctx.send("Colors for role(s) **{}** changed to **{}**".format(end_msg, x))
 
     if (err):
         await ctx.send("Role(s) **{}** not found!".format(err_msg))
@@ -174,25 +179,27 @@ async def list_roles(ctx, *args):
 @commands.check(check_user)
 async def list_assignable(ctx, *args):
     if (ctx.guild):
-        role_list = await roles.get_assignable_roles()
-        role_list = list(split_roles(role_list, 10))
-        rs = len(role_list)
-        n = 0
+        role_list = await roles.get_assignable_roles(int(ctx.guild.id))
+        if(len(role_list) == 0):
+            ctx.send("**No assignable roles!**")
+        else:
+            role_list = list(split_roles(role_list, 15))
+            rs = len(role_list)
+            n = 0
 
-        if (len(args) == 1):
-            n = int(' '.join(args)) - 1
+            if (len(args) == 1):
+                n = int(' '.join(args)) - 1
             if (n > rs):
                 n = rs - 1
             if (n < 0):
                 n = 0
 
-        msg = "```"
-        for row in role_list[n]:
-            if (int(row['SERVER_ID']) == int(ctx.guild.id)):
-                # print(row['ROLE_NAME'])
-                msg = msg + "\"" + row['ROLE_NAME'] + "\" \n"
-        msg = msg + "```"
-        await ctx.send(
+            msg = "```"
+            for row in role_list[n]:
+                # print(row)
+                msg = msg + "\"" + row + "\" \n"
+            msg = msg + "```"
+            await ctx.send(
             "**Roles that can be self-assigned: (Page {}/{})**\n{}".format(
                 n + 1, rs, msg))
 
@@ -246,7 +253,7 @@ async def make_role_assignable(ctx, *args):
             await ctx.send("Roles **{}** not found!".format(err_msg))
 
 
-@bot.command(name="roleremove", help="Remove a role from yourself")
+@bot.command(name="iamnot", help="Remove a role from yourself")
 @commands.check(check_user)
 async def remove_role(ctx, *args):
     if (ctx.guild):
@@ -287,14 +294,23 @@ async def give_role(ctx, *args):
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
 async def urban_define(ctx, *args):
-    try:
-        defs = urbandict.define(' '.join(args))
-        result = defs[0]
-        embd = discord.Embed(title=result['word'], description=result['def'],color=0xe74c3c)
-        embd.set_footer(text="Example: "+result['example'])
-        await ctx.send(embed=embd)
-    except:
+    # try:
+    #     defs = urbandict.define(' '.join(args))
+    #     result = defs[0]
+    #     embd = discord.Embed(title=result['word'], description=result['def'],color=0xe74c3c)
+    #     embd.set_footer(text="Example: "+result['example'])
+    #     await ctx.send(embed=embd)
+    # except:
+    #     embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
+    #     await ctx.send(embed=embd)
+    defs = ud_client.get_definition(' '.join(args))
+    if(len(defs) == 0):
         embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
+        await ctx.send(embed=embd)
+    else:
+        result = defs[0]
+        embd = discord.Embed(title=result.word, description=result.definition,color=0xe74c3c)
+        embd.set_footer(text="Example:\n"+result.example)
         await ctx.send(embed=embd)
     
 
