@@ -6,7 +6,6 @@ from discord.ext.commands.core import guild_only, is_owner
 import uwuify
 import datetime
 import discord
-
 import os
 import random
 import starboard as sb
@@ -452,15 +451,15 @@ async def on_message(message):
     # log messages
     if hasattr(message, 'channel'):
         if isinstance(message.channel, discord.channel.DMChannel):
-            print('New Message: {0}, Channel: {1}, User: {2}'.format(
+            print('[{0}] New Message: {1}, Channel: {2}, User: {3}'.format(message.created_at.isoformat(sep=' ', timespec='seconds'),
                 message.content, "DM", message.author.name))
         else:
-            if 'logs' not in message.channel.name:
-                print('New Message: {0}, Channel: {1}, User: {2}'.format(
+            if 'log' not in message.channel.name:
+                print('[{0}] New Message: {1}, Channel: {2}, User: {3}'.format(message.created_at.isoformat(sep=' ', timespec='seconds'),
                     message.content, message.channel.name,
                     message.author.name))
     else:
-        print('New Message: {0}, Channel: {1}, User: {2}'.format(
+        print('[{0}] New Message: {1}, Channel: {2}, User: {3}'.format(message.created_at.isoformat(sep=' ', timespec='seconds'),
             message.content, message.channel, message.author.name))
 
     # bot is mentioned
