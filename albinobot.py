@@ -135,7 +135,6 @@ async def edit_role_assignable(ctx, n, c, *args):
 @bot.command(name="rolecreate", help="Create a role")
 @commands.check(check_user)
 async def create_role(ctx, *args):
-    print("new")
     if (ctx.guild):
         if (not await find_role(ctx, ' '.join(args))):
             r = await ctx.guild.create_role(name=' '.join(args))
@@ -196,7 +195,6 @@ async def list_assignable(ctx, *args):
 
             msg = "```"
             for row in role_list[n]:
-                # print(row)
                 msg = msg + "\"" + row + "\" \n"
             msg = msg + "```"
             await ctx.send(
@@ -303,6 +301,7 @@ async def urban_define(ctx, *args):
     # except:
     #     embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
     #     await ctx.send(embed=embd)
+
     defs = ud_client.get_definition(' '.join(args))
     if(len(defs) == 0):
         embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
