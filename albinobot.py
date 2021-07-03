@@ -431,7 +431,7 @@ async def pdf(ctx):
 
 @bot.event
 async def on_connect():
-    print('Bot connected')
+    print('\nBot connected')
 
 
 @bot.event
