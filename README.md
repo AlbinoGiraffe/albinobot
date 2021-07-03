@@ -7,6 +7,7 @@ Simple Discord bot written in python using the Discord.py API
 - discord
 - python-dotenv
 - uwuify
+- udpy (for urban dictionary querying)
 
 ## Configuration
 
@@ -33,6 +34,7 @@ Simply run it with python 3.
 - ~~Cleverbot integration~~ (broken)
 - Send uwuified messages
 - Simple Yes,No,Maybe RNG function
+- User-assignable roles (```.iam Epic```)
 
 ### Admin Commands
 
@@ -41,6 +43,8 @@ Simply run it with python 3.
 - Set command prefix (and save it to the config)
 - Make bot reply to a message
 - Make bot say something
+- Create/Delete roles
+- Manage assignable roles
 
 ---
 
@@ -75,9 +79,39 @@ Get bot github link
 Send uwuified message:
 > .uwu \<message text>
 
-Get the Urban Dictionaru defintion of a word:
+Get the Urban Dictionary defintion of a word:
 > .ud \<word>
 
 ---
 
 ## Role Commands
+
+*All assignable roles for **all** servers are stored in a ```roles.csv``` in the parent directory.*
+
+
+Edit role(s) (currently only changing the color is supported)
+> .roleedit color \<hex or int color value> <role(s)>
+
+Create a role (creates a role with default values)
+> .rolecreate \<role name>
+
+Delete a role
+> .roledelete \<role name or id>
+
+List all server roles
+> .rolelistall \<page number (optional)>
+
+List all user-assignable roles
+> .rolelist \<page number>
+
+Add role(s) to the user-asignable list
+> .roleadd \<role name(s)>
+
+Remove role(s) from the user-asignable list
+> .roleunadd \<role name(s)>
+
+Add a role to yourself
+> .iam \<role name>
+
+Remove a role(s) from yourself
+> .iam \<role name>

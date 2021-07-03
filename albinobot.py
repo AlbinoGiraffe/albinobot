@@ -15,15 +15,14 @@ import time
 import re
 from discord.ext import commands
 from udpy import UrbanClient
-# import urbandict
 
 start = time.time()
 ud_client = UrbanClient()
 
 intents = discord.Intents.default()
-# intents.typing = True
-# intents.presences = False
-# intents.reactions = True
+intents.typing = True
+intents.presences = False
+intents.reactions = True
 
 dotenv_file = dotenv.find_dotenv()
 dotenv.load_dotenv(dotenv_file)
@@ -235,7 +234,7 @@ async def make_role_assignable(ctx, *args):
 
 @bot.command(name="roleunadd", help="Remove a self-assignable role")
 @commands.check(check_user)
-async def make_role_assignable(ctx, *args):
+async def make_role_unassignable(ctx, *args):
     if (ctx.guild):
         err = False
         err_msg = ""
