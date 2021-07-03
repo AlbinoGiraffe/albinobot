@@ -159,7 +159,9 @@ async def delete_role(ctx, n):
 @bot.command(name="rolelistall", help="List all roles on the server")
 async def list_roles(ctx, *args):
     if (ctx.guild):
-        role_list = list(split_roles(ctx.guild.roles, 10))
+        role_list = list(split_roles(ctx.guild.roles, 15))
+        num_roles = len(ctx.guild.roles)
+
         rs = len(role_list)
         n = 0
         if (len(args) == 1):
@@ -170,7 +172,7 @@ async def list_roles(ctx, *args):
                 n = 0
 
         msg = await gen_role_list(role_list, n)
-        await ctx.send("**Roles (Page {}\{}):**\n{}".format(n + 1, rs, msg))
+        await ctx.send("**{} Roles (Page {}\{}):**\n{}".format(num_roles, n + 1, rs, msg))
 
 
 @bot.command(name="rolelist", help="List all addable roles")
@@ -178,6 +180,8 @@ async def list_roles(ctx, *args):
 async def list_assignable(ctx, *args):
     if (ctx.guild):
         role_list = await roles.get_assignable_roles(int(ctx.guild.id))
+        num_roles = len(role_list)
+
         if(len(role_list) == 0):
             ctx.send("**No assignable roles!**")
         else:
@@ -197,7 +201,7 @@ async def list_assignable(ctx, *args):
                 msg = msg + "\"" + row + "\" \n"
             msg = msg + "```"
             await ctx.send(
-            "**Roles that can be self-assigned: (Page {}/{})**\n{}".format(
+            "**{} Roles that can be self-assigned: (Page {}/{})**\n{}".format(num_roles,
                 n + 1, rs, msg))
 
 
@@ -213,7 +217,8 @@ async def make_role_assignable(ctx, *args):
         for role in args:
             r = await find_role(ctx, role)
             if (r):
-                await roles.add_row(ctx, r)
+                if(not (await roles.is_assignable(r.id))):
+                    await roles.add_row(ctx, r)
                 
                 end = True
                 end_msg = end_msg + r.name + ", "
@@ -240,12 +245,15 @@ async def make_role_assignable(ctx, *args):
             r = await find_role(ctx, role)
             if (r):
                 await roles.delete_row(ctx, r)
+                
+                end = True
                 end_msg = end_msg + r.name + ", "
             else:
                 err = True
                 err_msg = err_msg + role + ", "
-
-        await ctx.send("Role(s) **{}** are now unassignable".format(end_msg))
+        
+        if(end):
+            await ctx.send("Role(s) **{}** are now unassignable".format(end_msg))
         if (err):
             await ctx.send("Roles **{}** not found!".format(err_msg))
 
