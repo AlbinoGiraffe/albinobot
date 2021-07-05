@@ -16,6 +16,9 @@ import re
 from discord.ext import commands
 from udpy import UrbanClient
 
+import asyncio
+import cleverbotfree
+
 start = time.time()
 ud_client = UrbanClient()
 
@@ -34,6 +37,13 @@ admin_id = os.getenv("ADMIN_ID")
 bot = discord.Client()
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
+
+# cleverbot
+async def cb_response(query):
+    async with cleverbotfree.async_playwright() as p_w:
+            c_b = await cleverbotfree.CleverbotAsync(p_w)
+            bot = await c_b.single_exchange(query)
+    return bot
 
 # check that user is bot owner or admin
 async def check_user(ctx):
@@ -175,7 +185,6 @@ async def list_roles(ctx, *args):
 
 
 @bot.command(name="rolelist", help="List all addable roles")
-@commands.check(check_user)
 async def list_assignable(ctx, *args):
     if (ctx.guild):
         role_list = await roles.get_assignable_roles(int(ctx.guild.id))
@@ -307,8 +316,9 @@ async def urban_define(ctx, *args):
     # except:
     #     embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
     #     await ctx.send(embed=embd)
-
     defs = ud_client.get_definition(' '.join(args))
+    for r in defs:
+        print(r.word)
     if(len(defs) == 0):
         embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
         await ctx.send(embed=embd)
@@ -471,14 +481,25 @@ async def on_message(message):
 
     # bot is mentioned
     if bot.user.mentioned_in(message):
+        query = message.content.replace('<@!560284009469575169> ', '')
+        query = query.replace('<', '')   
+           
+        response = await cb_response(query)
         print('Mentioned: \'{0}\' {1}'.format(message.content,
                                               message.author.name))
-        await message.channel.send("Hi {}, i'm useless!".format(
-            message.author.mention))
+        await message.channel.trigger_typing()
+        await message.reply(response)
 
     # bot is DM'd
-    # if isinstance(message.channel, discord.channel.DMChannel):
-    #     await message.channel.send("hello, i dont do anything anymore")
+    if isinstance(message.channel, discord.channel.DMChannel):
+        query = message.content.replace('<@!560284009469575169> ', '')
+        query = query.replace('<', '')  
+        
+        response = await cb_response(query)
+        print('DM\'d: \'{0}\' {1}'.format(message.content,
+                                              message.author.name))
+        await message.channel.trigger_typing()      
+        await message.channel.send(response)
 
     # emphasizes previous message
     if (message.content.lower() == "what"):
@@ -512,7 +533,11 @@ async def on_raw_reaction_add(payload):
         reaction = discord.utils.get(message.reactions,
                                      emoji=payload.emoji.name)
         if reaction and reaction.count >= 2:
-            await message.pin()
+            try:
+                await message.pin()
+            except:
+                # await channel.send("Can't pin! There might be too many pins on this channel?")
+                print("Error Pinning!")
 
     # star board
     if payload.emoji.name == "⭐":

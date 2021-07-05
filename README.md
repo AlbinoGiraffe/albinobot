@@ -43,7 +43,7 @@ Simply run it with python 3.
 - Set command prefix (and save it to the config)
 - Make bot reply to a message
 - Make bot say something
-- Create/Delete roles
+- Create/Edit/Delete roles
 - Manage assignable roles
 
 ---
