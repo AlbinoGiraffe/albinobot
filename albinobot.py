@@ -307,18 +307,7 @@ async def give_role(ctx, *args):
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
 async def urban_define(ctx, *args):
-    # try:
-    #     defs = urbandict.define(' '.join(args))
-    #     result = defs[0]
-    #     embd = discord.Embed(title=result['word'], description=result['def'],color=0xe74c3c)
-    #     embd.set_footer(text="Example: "+result['example'])
-    #     await ctx.send(embed=embd)
-    # except:
-    #     embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
-    #     await ctx.send(embed=embd)
     defs = ud_client.get_definition(' '.join(args))
-    for r in defs:
-        print(r.word)
     if(len(defs) == 0):
         embd = discord.Embed(title="Error Getting Word", description="Maybe it doesn't exist on UD?")
         await ctx.send(embed=embd)
