@@ -336,7 +336,10 @@ async def reply(ctx, id: int, *args):
     # sanitize
     msg = msg.replace('@everyone', '@\u200beveryone')
     m = await ctx.fetch_message(id)
-    await m.reply(msg)
+    try:
+        await m.reply(msg)
+    except:
+        print("Failed replying!")
     await delete_message(ctx.message)
 
 
@@ -470,14 +473,27 @@ async def on_message(message):
 
     # bot is mentioned
     if bot.user.mentioned_in(message):
-        query = message.content.replace('<@!560284009469575169> ', '')
-        query = query.replace('<', '')   
-           
+        print('Mentioned: \'{0}\' {1}'.format(message.content, message.author.name))
+        query = message.content.replace('<@560284009469575169>', '')
+        query = message.content.replace('<@!560284009469575169>', '')
+        query = query.replace('<', '')
+        query = query.replace('>', '')
+        query = query.replace('@', '')   
+
+        print("CB QUERY: {}".format(query))
         response = await cb_response(query)
-        print('Mentioned: \'{0}\' {1}'.format(message.content,
-                                              message.author.name))
+        #if(response):
         await message.channel.trigger_typing()
-        await message.reply(response)
+        try:
+            await message.reply(response)
+        except:
+            print("Failed replying!")
+        #else:
+        #    await message.channel.trigger_typing()
+        #    try:
+        #        await message.reply("*Ignores you*")
+        #    except:
+        #        print("Failed replying!")
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
