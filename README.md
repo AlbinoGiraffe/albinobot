@@ -7,6 +7,7 @@ Simple Discord bot written in python using the Discord.py API
 - discord
 - python-dotenv
 - uwuify
+- cleverbotfree
 - udpy (for urban dictionary querying)
 
 ## Configuration
@@ -31,7 +32,7 @@ Simply run it with python 3.
 
 - Pin messages after a certain reaction threshold
 - Simple Star Board
-- ~~Cleverbot integration~~ (broken)
+- Cleverbot integration
 - Send uwuified messages
 - Simple Yes,No,Maybe RNG function
 - User-assignable roles (```.iam Epic```)
