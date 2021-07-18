@@ -15,6 +15,7 @@ import time
 import re
 from discord.ext import commands
 from udpy import UrbanClient
+import chatbot as cb
 
 import asyncio
 import cleverbotfree
@@ -41,8 +42,9 @@ bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 # cleverbot
 async def cb_response(query):
     async with cleverbotfree.async_playwright() as p_w:
-            c_b = await cleverbotfree.CleverbotAsync(p_w)
-            bot = await c_b.single_exchange(query)
+        c_b = await cleverbotfree.CleverbotAsync(p_w)
+        bot = await c_b.single_exchange(query)
+        await c_b.close()
     return bot
 
 # check that user is bot owner or admin
@@ -474,37 +476,36 @@ async def on_message(message):
     # bot is mentioned
     if bot.user.mentioned_in(message):
         print('Mentioned: \'{0}\' {1}'.format(message.content, message.author.name))
-        query = message.content.replace('<@560284009469575169>', '')
-        query = message.content.replace('<@!560284009469575169>', '')
+        query = message.content.replace('<@560284009469575169> ', '')
+        query = message.content.replace('<@!560284009469575169> ', '')
         query = query.replace('<', '')
         query = query.replace('>', '')
         query = query.replace('@', '')   
 
         print("CB QUERY: {}".format(query))
-        response = await cb_response(query)
+        # response = await cb_response(query)
+        response  = cb.speak(query)
         #if(response):
         await message.channel.trigger_typing()
         try:
             await message.reply(response)
         except:
             print("Failed replying!")
-        #else:
-        #    await message.channel.trigger_typing()
-        #    try:
-        #        await message.reply("*Ignores you*")
-        #    except:
-        #        print("Failed replying!")
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
+        print('DM\'d: \'{0}\' {1}'.format(message.content, message.author.name))
         query = message.content.replace('<@!560284009469575169> ', '')
         query = query.replace('<', '')  
         
-        response = await cb_response(query)
-        print('DM\'d: \'{0}\' {1}'.format(message.content,
-                                              message.author.name))
-        await message.channel.trigger_typing()      
-        await message.channel.send(response)
+        # response = await cb_response(query)
+        response = cb.speak(query)
+        
+        await message.channel.trigger_typing()
+        if(len(response) > 0):    
+            await message.channel.send(response)
+        else:
+            await message.channel.send("*Ignores you*")
 
     # emphasizes previous message
     if (message.content.lower() == "what"):
@@ -522,6 +523,7 @@ async def on_message(message):
 
     # process bot commands
     await bot.process_commands(message)
+    
 
 
 @bot.event
