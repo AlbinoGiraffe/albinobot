@@ -1,32 +1,18 @@
-from hashlib import new
-from typing import DefaultDict
-from discord.embeds import EmptyEmbed
-from discord.errors import InvalidArgument
-from discord.ext.commands.core import guild_only, is_owner
+import starboard as sb
+import roles
+
 import uwuify
 import datetime
 import discord
 import os
 import random
-import starboard as sb
-import roles
+
 import dotenv
 import time
 import re
 from discord.ext import commands
 from udpy import UrbanClient
-import chatbot as cb
-
-import asyncio
-import cleverbotfree
-
-start = time.time()
-ud_client = UrbanClient()
-
-intents = discord.Intents.default()
-intents.typing = True
-intents.presences = False
-intents.reactions = True
+from cleverwrap import CleverWrap
 
 dotenv_file = dotenv.find_dotenv()
 dotenv.load_dotenv(dotenv_file)
@@ -34,18 +20,28 @@ dotenv.load_dotenv(dotenv_file)
 discord_token = os.getenv("DISCORD_TOKEN")
 c_prefix = os.getenv("PREFIX")
 admin_id = os.getenv("ADMIN_ID")
+cb_api_key = os.getenv("CB_API_KEY")
+
+start = time.time()
+ud_client = UrbanClient()
+cb = CleverWrap(str(cb_api_key))
+
+intents = discord.Intents.default()
+intents.typing = True
+intents.presences = False
+intents.reactions = True
 
 bot = discord.Client()
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
-
-# cleverbot
-async def cb_response(query):
-    async with cleverbotfree.async_playwright() as p_w:
-        c_b = await cleverbotfree.CleverbotAsync(p_w)
-        bot = await c_b.single_exchange(query)
-        await c_b.close()
-    return bot
+# clean message for cleverbot
+async def clean_input(input):
+    query = input.replace('<@560284009469575169> ', '')
+    query = query.replace('<@!560284009469575169> ', '')
+    query = query.replace('<', '')
+    query = query.replace('>', '')
+    query = query.replace('@', '')
+    return query
 
 # check that user is bot owner or admin
 async def check_user(ctx):
@@ -277,12 +273,11 @@ async def remove_role(ctx, *args):
             try:
                 await ctx.author.remove_roles(r)
             except:
-                await ctx.send("Error removing the **{}** role!".format(r.name)
-                               )
+                await ctx.send("Error removing the **{}** role!".format(r.name))
                 return
             await ctx.send("Removed the **{}** role!".format(r.name))
         else:
-            await ctx.send("Role **{}** not found!".format(n))
+            await ctx.send("Role **{}** not found!".format(' '.join(args)))
 
 
 @bot.command(name="iam", help="Give yourself a role")
@@ -306,6 +301,12 @@ async def give_role(ctx, *args):
 
 ## END ROLE COMMANDS
 
+# Change game status
+@bot.command(name="gs", help="Update bot's status")
+@commands.check(check_user)
+async def update_gs(ctx, *args):
+    await bot.change_presence(game=discord.Game(name=' '.join(args)))
+
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
 async def urban_define(ctx, *args):
@@ -327,7 +328,6 @@ async def set_command_pref(ctx, n: str):
     bot.command_prefix = n
     dotenv.set_key(dotenv_file, "PREFIX", n)
     await ctx.send("New prefix is: {}".format(n))
-
 
 # reply to a message given it's id (must be in same channel)
 @bot.command(help="Make bot reply to a message ID")
@@ -476,36 +476,29 @@ async def on_message(message):
     # bot is mentioned
     if bot.user.mentioned_in(message):
         print('Mentioned: \'{0}\' {1}'.format(message.content, message.author.name))
-        query = message.content.replace('<@560284009469575169> ', '')
-        query = message.content.replace('<@!560284009469575169> ', '')
-        query = query.replace('<', '')
-        query = query.replace('>', '')
-        query = query.replace('@', '')   
-
+        query = clean_input(message.content)  
         print("CB QUERY: {}".format(query))
-        # response = await cb_response(query)
-        response  = cb.speak(query)
-        #if(response):
+        response = cb.say("Hello")
+
         await message.channel.trigger_typing()
         try:
             await message.reply(response)
         except:
+            await message.channel.send("*Ignores you*")
             print("Failed replying!")
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
         print('DM\'d: \'{0}\' {1}'.format(message.content, message.author.name))
-        query = message.content.replace('<@!560284009469575169> ', '')
-        query = query.replace('<', '')  
-        
-        # response = await cb_response(query)
-        response = cb.speak(query)
+        query = clean_input(message.content)
+        response = cb.say(query)
         
         await message.channel.trigger_typing()
         if(len(response) > 0):    
             await message.channel.send(response)
         else:
             await message.channel.send("*Ignores you*")
+            print("Failed replying!")
 
     # emphasizes previous message
     if (message.content.lower() == "what"):
