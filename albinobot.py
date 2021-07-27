@@ -337,6 +337,8 @@ async def remove_role(ctx, *args):
             await ctx.send("Role **{}** not found!".format(' '.join(args)))
 
 
+# TODO: MAKE FUNNY
+
 @bot.command(name="iam", help="Give yourself a role")
 async def give_role(ctx, *args):
     if (ctx.guild):
@@ -354,8 +356,7 @@ async def give_role(ctx, *args):
                     return
                 await ctx.send("You now have the **{}** role!".format(r[0].name))
             else:
-                await ctx.send("You can't have the **{}** role!".format(r[0].name)
-                               )
+                await ctx.send("You can't have the **{}** role!".format(r[0].name))
         else:
             await ctx.send("Role **{}** not found!".format(' '.join(args)))
 
