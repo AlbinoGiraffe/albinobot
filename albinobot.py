@@ -120,7 +120,7 @@ async def find_role(ctx, n):
     for r in ctx.guild.roles:
         if str(n).lower() == str(r.name).lower():
             result.append(r)
-        if int(n) == r.id:
+        if n == r.id:
             result.append(r)
     return result
 
