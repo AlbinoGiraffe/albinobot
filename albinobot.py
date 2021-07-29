@@ -368,7 +368,7 @@ async def give_role(ctx, *args):
 @bot.command(name="gs", help="Update bot's status")
 @commands.check(check_user)
 async def update_gs(ctx, *args):
-    await bot.change_presence(game=discord.Game(name=' '.join(args)))
+    await bot.change_presence(activity=discord.Game(name=' '.join(args)))
 
 
 # Urban Dictionary
