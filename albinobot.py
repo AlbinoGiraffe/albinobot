@@ -2,13 +2,13 @@ import starboard as sb
 import roles
 
 import uwuify
-from datetime import datetime
 import discord
 import os
 import random
 import dotenv
 import time
 import re
+from datetime import datetime
 from discord.ext import commands
 from udpy import UrbanClient
 from cleverwrap import CleverWrap
@@ -488,7 +488,7 @@ async def ping(ctx):
 @bot.command(name="time", help="Get bot's time")
 async def get_time(ctx):
     await ctx.trigger_typing()
-    await ctx.send('It\'s {0} PST'.format(datetime.today().isoformat(
+    await ctx.send('It\'s {0} UTC'.format(datetime.today().isoformat(
         ' ', 'seconds')))
 
 
