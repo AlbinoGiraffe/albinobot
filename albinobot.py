@@ -1,3 +1,5 @@
+from enum import auto
+from discord import client
 import starboard as sb
 import roles
 
@@ -8,6 +10,7 @@ import random
 import dotenv
 import time
 import re
+import asyncio
 from datetime import datetime
 from discord.ext import commands
 from udpy import UrbanClient
@@ -35,6 +38,10 @@ bot_intents = discord.Intents.default()
 bot = discord.Client(intents=bot_intents)
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
+# snipe setup
+snipe_message_author = {}
+snipe_message_content = {}
+snipe_message_date = {}
 
 # log messages
 async def log(type, message):
@@ -48,6 +55,10 @@ async def log(type, message):
             message.content, message.channel.name, message.author.name))
     if (type == 'mention'):
         print('[{0}] Mentioned: \'{1}\' {2}'.format(
+            message.created_at.isoformat(sep=' ', timespec='seconds'),
+            message.content, message.author.name))
+    if (type == 'delete'):
+        print('[{0}] Message Deleted: \'{1}\' {2}'.format(
             message.created_at.isoformat(sep=' ', timespec='seconds'),
             message.content, message.author.name))
 
@@ -527,24 +538,24 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
+    # snipe messages
+    if message.content.lower() == "pls snipe":
+        channel = message.channel
+        try:
+            embed = discord.Embed(title=f"{snipe} deleted a message", color=0xe74c3c)
+            embed.add_field(name="Message:", value=last_msg.content, inline=True)
+            embed.set_footer(text=f"id: {msg_id} | {} | #{channel.name}")
+            await message.channel.send(embed=embed)
+        except:
+
+        return
+
     # log messages
     if isinstance(message.channel, discord.channel.DMChannel):
         await log('DM', message)
     else:
         if 'log' not in message.channel.name:
             await log('message', message)
-
-    # bot is mentioned
-    if bot.user.mentioned_in(message):
-        await log('mention', message)
-        query = await clean_input(message.content)
-        response = cb.say(query)
-
-        await message.channel.trigger_typing()
-        try:
-            await message.reply(response)
-        except:
-            await message.channel.send("*Ignores you*")
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
@@ -556,6 +567,23 @@ async def on_message(message):
             await message.channel.send(response)
         else:
             await message.channel.send("*Ignores you*")
+            return
+
+    # emphasizes referenced message
+    if(message.reference):
+        if(message.content.lower() == "what"):
+            new_msg = await message.channel.fetch_message(message.reference.message_id)
+
+            if (len(new_msg.attachments) > 0):
+                return
+
+            text = new_msg.content
+            if (text == text.upper()):
+                text = "*{}*".format(text)
+            else:
+                text = text.upper()
+            await message.channel.send(text)
+            return
 
     # emphasizes previous message
     if (message.content.lower() == "what"):
@@ -570,6 +598,19 @@ async def on_message(message):
             new_msg = new_msg.upper()
 
         await message.channel.send(new_msg)
+        return 
+
+    # bot is mentioned
+    if bot.user.mentioned_in(message):
+        await log('mention', message)
+        query = await clean_input(message.content)
+        response = cb.say(query)
+
+        await message.channel.trigger_typing()
+        try:
+            await message.reply(response)
+        except:
+            await message.channel.send("*Ignores you*")
 
     # process bot commands
     await bot.process_commands(message)
@@ -635,32 +676,16 @@ async def on_raw_reaction_add(payload):
         else:
             return
 
-
 # message deleted
-# @client.event
-# async def on_message_delete(message):
-#     if(message.guild.id == 760375168815071264):
-#         print("message deleted ({}): {}".format(message.author.name, message.content))
-#         if(message.author.id == 670058949709529094):
-#             channel = client.get_channel(829165070734327858)
-#             embed = discord.Embed(title="Takyon deleted a message", help="", color=0xe74c3c)
-#             # embed.add_field(name)
-#             embed.add_field(name="Message:", value=message.content, inline=True)
-#             embed.set_footer(text="id: {} | {} | #{}".format(message.id, message.created_at, message.channel.name))
-#             await channel.send(embed=embed)
-
-# message edited
-# @client.event
-# async def on_message_edit(before, after):
-#     if(after.guild.id == 760375168815071264):
-#         print("message edited ({}): before: {}, after: {}".format(before.author.name, before.content, after.content))
-#         if(after.author.id == 670058949709529094):
-#             channel = client.get_channel(829165070734327858)
-#             embed = discord.Embed(title="Takyon edited a message", help="", color=0xe74c3c)
-#             # embed.add_field(name)
-#             embed.add_field(name="Before:", value=before.content, inline=True)
-#             embed.add_field(name="After:", value=after.content, inline=True)
-#             embed.set_footer(text="{} | #{}".format(after.created_at, after.channel.name))
-#             await channel.send(embed=embed)
-
+@bot.event
+async def on_message_delete(message):
+    await log('delete', message)
+    snipe_message_author[message.channel.id] = message.author
+    snipe_message_content[message.channel.id] = message.content
+    snipe_message_date[message.channel.id] = message.created_at
+    await asyncio.sleep(60)
+    del snipe_message_author[message.channel.id]
+    del snipe_message_content[message.channel.id]
+    del snipe_message_date[message.channel.id]
+        
 bot.run(discord_token)
