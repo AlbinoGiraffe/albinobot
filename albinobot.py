@@ -42,6 +42,7 @@ bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 snipe_message_author = {}
 snipe_message_content = {}
 snipe_message_date = {}
+snipe_message_id = {}
 
 # log messages
 async def log(type, message):
@@ -542,13 +543,12 @@ async def on_message(message):
     if message.content.lower() == "pls snipe":
         channel = message.channel
         try:
-            embed = discord.Embed(title=f"{snipe} deleted a message", color=0xe74c3c)
-            embed.add_field(name="Message:", value=last_msg.content, inline=True)
-            embed.set_footer(text=f"id: {msg_id} | {} | #{channel.name}")
+            embed = discord.Embed(title=f"{snipe_message_author[channel.id]} deleted a message", color=0xe74c3c)
+            embed.add_field(name="Message:", value=snipe_message_content[channel.id], inline=True)
+            embed.set_footer(text=f"id: {snipe_message_id[channel.id]} | {snipe_message_date[channel.id]} | #{channel.name}")
             await message.channel.send(embed=embed)
         except:
-
-        return
+            return
 
     # log messages
     if isinstance(message.channel, discord.channel.DMChannel):
@@ -683,9 +683,14 @@ async def on_message_delete(message):
     snipe_message_author[message.channel.id] = message.author
     snipe_message_content[message.channel.id] = message.content
     snipe_message_date[message.channel.id] = message.created_at
+    snipe_message_id[message.channel.id] = message.id
     await asyncio.sleep(60)
-    del snipe_message_author[message.channel.id]
-    del snipe_message_content[message.channel.id]
-    del snipe_message_date[message.channel.id]
+    try:
+        del snipe_message_author[message.channel.id]
+        del snipe_message_content[message.channel.id]
+        del snipe_message_date[message.channel.id]
+        del snipe_message_id[message.channel.id]
+    except:
+        return
         
 bot.run(discord_token)
