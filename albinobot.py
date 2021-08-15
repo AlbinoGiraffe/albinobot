@@ -1,5 +1,3 @@
-from enum import auto
-from discord import client
 import starboard as sb
 import roles
 
@@ -11,6 +9,7 @@ import dotenv
 import time
 import re
 import asyncio
+
 from datetime import datetime
 from discord.ext import commands
 from udpy import UrbanClient
@@ -34,11 +33,10 @@ cb = CleverWrap(str(cb_api_key))
 
 # set up discord api client
 bot_intents = discord.Intents.default()
-
 bot = discord.Client(intents=bot_intents)
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
-# snipe setup
+# message snipe setup
 snipe_message_author = {}
 snipe_message_content = {}
 snipe_message_date = {}
@@ -46,6 +44,7 @@ snipe_message_id = {}
 
 # log messages
 async def log(type, message):
+
     if (type == 'DM'):
         print('[{0}] New Message: {1}, Channel: {2}, User: {3}'.format(
             message.created_at.isoformat(sep=' ', timespec='seconds'),
@@ -62,6 +61,20 @@ async def log(type, message):
         print('[{0}] Message Deleted: \'{1}\' {2}'.format(
             message.created_at.isoformat(sep=' ', timespec='seconds'),
             message.content, message.author.name))
+    
+    # errors
+    if (type == 'pin_error'):
+        print("[{}] Error Pinning! ({}, #{})".format(
+                    datetime.now().isoformat(sep=' ', timespec='seconds'),
+                    message.guild.name, message.channel.name))
+    if (type == 'sb_error'):
+        print("[{}] Star Board not found! ({})".format(
+                    datetime.now().isoformat(sep=' ', timespec='seconds'),
+                    message.guild.name))   
+    if (type == 'del_error'):
+        print("[{}] Error Deleting! ({}, #{})".format(
+                    datetime.now().isoformat(sep=' ', timespec='seconds'),
+                    message.guild.name, message.channel.name))
 
 
 # clean messages for cleverbot
@@ -83,11 +96,9 @@ async def check_user(ctx):
 # delete a message
 async def delete_message(message):
     try:
-        # if(not message.author == bot.user):
         await message.delete()
     except:
-        print("Cannot Delete '\"{}\"' NO PERMS".format(message.content))
-        # await message.channel.send("Missing Permissions!")
+        log('del_error', message)
 
 
 # generate embed for star board
@@ -548,6 +559,7 @@ async def on_message(message):
             embed.set_footer(text=f"id: {snipe_message_id[channel.id]} | {snipe_message_date[channel.id]} | #{channel.name}")
             await message.channel.send(embed=embed)
         except:
+            await message.channel.send("No message to snipe!")
             return
 
     # log messages
@@ -625,37 +637,32 @@ async def on_command_error(ctx, err):
 
 @bot.event
 async def on_raw_reaction_add(payload):
+    # ignore private channels/ DMs
+    channel = bot.get_channel(payload.channel_id)
+    message = await channel.fetch_message(payload.message_id)
+    reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
+    if (isinstance(channel, discord.abc.PrivateChannel)):
+        return
+    
+    
     # pin messages
     if payload.emoji.name == "📌":
-        channel = bot.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        reaction = discord.utils.get(message.reactions,
-                                     emoji=payload.emoji.name)
         if reaction and reaction.count >= 2:
             try:
                 await message.pin()
             except:
                 # await channel.send("Can't pin! There might be too many pins on this channel?")
-                print("[{}] Error Pinning! ({}, #{})".format(
-                    datetime.now().isoformat(sep=' ', timespec='seconds'),
-                    message.guild.name, channel.name))
+                log('pin_error', message)
 
     # star board
     if payload.emoji.name == "⭐":
-        channel = bot.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        reaction = discord.utils.get(message.reactions,
-                                     emoji=payload.emoji.name)
         board = discord.utils.get(channel.guild.channels, name="star-board")
-
-        if (isinstance(channel, discord.abc.PrivateChannel)):
-            return
         if (board):
+            # ignore reactions in board channel
             if (channel.id == board.id):
                 return
             if reaction and reaction.count > 1:
-                board_id = await sb.check_board(
-                    message.id)  # check if message is already on board
+                board_id = await sb.check_board(message.id)  # check if message is already on board
                 embed = await board_embed(message, reaction)  # generate embed
 
                 if (board_id):
@@ -665,15 +672,15 @@ async def on_raw_reaction_add(payload):
                         # message doesnt exist in board, update list
                         await sb.delete_row(message.id)
                         board_message = await board.send(embed=embed)
-                        await sb.add_row(message, board_message,
-                                         reaction.count)
-
+                        await sb.add_row(message, board_message, reaction.count)
+                    
                     await board_message.edit(embed=embed)
                 else:
                     # message not in board, update list
                     board_message = await board.send(embed=embed)
                     await sb.add_row(message, board_message, reaction.count)
         else:
+            log ('sb_error', message)
             return
 
 # message deleted
