@@ -379,7 +379,7 @@ async def role_list(ctx, pg=0):
             else:
                 role_list = list(split_roles(role_list, 15))
                 rs = len(role_list)
-                n = pg
+                n = pg - 1
 
                 if (n > rs):
                     n = rs - 1
@@ -400,7 +400,8 @@ async def role_list_all(ctx, pg=0):
         num_roles = len(ctx.guild.roles) - 1
         
         rs = len(role_list)
-        n = pg
+        n = pg - 1
+        
         if (n > rs):
             n = rs - 1
         if (n < 0):
@@ -483,7 +484,7 @@ async def urban_define(ctx, *args):
 
 
 # set command prefix eg. ".gb"
-@bot.command(name="cp", help="Change a command prefix")
+@bot.command(name="cp", help="Change the command prefix")
 @commands.check(check_user)
 async def set_command_pref(ctx, n: str):
     bot.command_prefix = n
