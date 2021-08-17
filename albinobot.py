@@ -188,8 +188,8 @@ async def role(ctx):
 async def role_edit(ctx):
     if ctx.invoked_subcommand is None:
         embd = discord.Embed(description="**Role edit commands:**\n" +
-                                "color [color] [role names/ids]\n" +
-                                "name [role name] [new role name]\n")
+                                "color [role name/id] [color]\n" +
+                                "name  [role name/id] [new role name]\n")
         await ctx.send(embed=embd)
 
 @role_edit.command(name="color")
@@ -401,7 +401,7 @@ async def role_list_all(ctx, pg=0):
         
         rs = len(role_list)
         n = pg - 1
-        
+
         if (n > rs):
             n = rs - 1
         if (n < 0):
