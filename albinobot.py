@@ -1,3 +1,5 @@
+from asyncio.events import AbstractEventLoopPolicy
+from discord import embeds
 from discord.ext.commands.core import check
 import starboard as sb
 import roles
@@ -90,7 +92,6 @@ async def clean_input(input):
 
 # check that user is bot owner or admin
 async def check_user(ctx):
-    await ctx.send("checked user")
     return (ctx.message.author.id == int(
         bot.owner_id)) or ctx.message.author.guild_permissions.administrator
 
@@ -122,7 +123,6 @@ async def board_embed(message, reaction):
 
 ## ROLE FUNCTIONS
 
-
 # break role list into chunks
 def split_roles(lst, n):
     for i in range(0, len(lst), n):
@@ -142,83 +142,279 @@ async def gen_role_list(role_list, n):
 # find roles matching id or name
 async def find_role(ctx, n):
     result = list()
+    x = 0
     for r in ctx.guild.roles:
+        try:
+            x = int(n)
+        except:
+            x = 0
+
         if str(n).lower() == str(r.name).lower():
             result.append(r)
-        if n == r.id:
+        if x == r.id:
             result.append(r)
+
     return result
 
 
 async def list_duplicates(roles):
-    msg = "```Duplicate roles! Use role IDs instead\n"
+    msg = "**Duplicate roles! Use role IDs instead**\n"
     for r in roles:
         msg = msg + r.name + " - " + str(r.id) + "\n"
-    msg = msg + "```"
     return msg
 
 # role parent group
 @bot.group()
 async def role(ctx):
+    embd = None
     if ctx.invoked_subcommand is None:
-        if(check_user(ctx)):
-            await ctx.send("```Role commands:\n" +
-                                "    edit [color]\n" +
-                                "    create\n" +
-                                "    delete\n" + 
-                                "    list [all]\n" +
-                                "    add\n" +
-                                "    unadd```")
+        if(await check_user(ctx)):
+            embd = discord.Embed(description="**Role commands:**\n" +
+                                "edit [color, name]\n" +
+                                "create\n" +
+                                "delete\n" + 
+                                "list\n" +
+                                "listall\n" +
+                                "add\n" +
+                                "unadd")
         else:
-            await ctx.send("```Role commands:\n" +
+            embd = discord.Embed("```**Role commands:**\n" +
                                 "    list (all)\n```")
+        await ctx.send(embed=embd)
+
 # role edit group
 @role.group(name="edit")
 @commands.check(check_user)
 async def role_edit(ctx):
     if ctx.invoked_subcommand is None:
-        await ctx.send("edit a role")
-    return
+        embd = discord.Embed(description="**Role edit commands:**\n" +
+                                "color [color] [role names/ids]\n" +
+                                "name [role name] [new role name]\n")
+        await ctx.send(embed=embd)
 
 @role_edit.command(name="color")
 @commands.check(check_user)
-async def role_edit_color(ctx):
-    await ctx.send("edit color")
+async def role_edit_color(ctx, rn, *args):
+    embd = None
+    if(ctx.guild):
+        color = ' '.join(args)
+        r = await find_role(ctx, rn)
 
+        if(len(r) > 1):
+            embd = discord.Embed(description=await list_duplicates(r))
+        else:
+            if (r):
+                if not (re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', color)
+                        or re.search(r'^(?:[0-9a-fA-F]{3}){1,2}$', color)):
+                    embd = discord.Embed(description="**{}** is not valid color code!".format(color))
+                else:
+                    x = color.lstrip('#')
+                    try:
+                        await r[0].edit(color=int(x, 16))
+                        embd = discord.Embed(description="Role color for **{}** changed to **{}**".format(rn, x), color=int(x, 16))
+                    except:
+                        embd = discord.Embed(description="Error changing color! (Missing permissions?)")
+            else:
+                embd = discord.Embed(description="Role **{}** not found!".format(rn))
+        
+        await ctx.send(embed=embd)
+    
+
+@role_edit.command(name="name")
+@commands.check(check_user)
+async def role_edit_name(ctx, n, *args):
+    embd = None
+    if(ctx.guild):
+        r = await find_role(ctx, n)
+        if(len(r) > 1):
+            embd = discord.Embed(description=await list_duplicates(r))
+        else:
+            if(r):
+                old_name = r[0].name
+                try:
+                    if (len(' '.join(args)) == 0):
+                        embd = discord.Embed(description="**Role name can't be empty!**")
+                    else:
+                        await r[0].edit(name=' '.join(args))
+                        embd = discord.Embed(description="Role name **{}** changed to **{}**".format(old_name, ' '.join(args)))
+                except:
+                    embd = discord.Embed(description="**Error changing role name!**")
+            else:
+                embd = discord.Embed(description="Role **{}** not found!".format(n))
+    
+        await ctx.send(embed=embd)
+        
 
 # role create/delete commands 
 @role.command(name="create")
 @commands.check(check_user)
-async def role_create(ctx):
-    ctx.send("create role")
+async def role_create(ctx, *args):
+    if (ctx.guild):
+        err = False
+        end = False
+        err_msg = ''
+        end_msg = ''
+
+        for n in args:
+            try:
+                r = await ctx.guild.create_role(name=n)
+                
+                end = True
+                end_msg = end_msg + n + ", "
+            except:
+                err = True
+                err_msg = err_msg + n + ", "
+
+    if (end):
+        embd = discord.Embed(description="Role(s) **{}** created".format(end_msg))
+        await ctx.send(embed=embd)
+
+    if (err):
+        embd = discord.Embed(description="Role(s) **{}** not created!".format(err_msg), color=int('ff0000', 16))
+        await ctx.send(embed=embd)
 
 @role.command(name="delete")
 @commands.check(check_user)
-async def role_delete(ctx):
-    ctx.send("delete role")
+async def role_delete(ctx, *args):
+    if (ctx.guild):
+        err = False
+        end = False
+        err_msg = ''
+        end_msg = ''
+
+        for n in args:
+            r = await find_role(ctx, n)
+            if(len(r) > 1):
+                await ctx.send(embed=discord.Embed(description=await list_duplicates(r)))
+                return
+            if(r):
+                try:
+                    await r[0].delete()
+                    end = True
+                    end_msg = end_msg + n + ", "
+                except:
+                    err = True
+                    err_msg = err_msg + n + ", "
+            else:
+                err = True
+                err_msg = err_msg + n + ", "
+
+    if (end):
+        embd = discord.Embed(description="Role(s) **{}** deleted".format(end_msg))
+        await ctx.send(embed=embd)
+
+    if (err):
+        embd = discord.Embed(description="Role(s) **{}** not deleted!".format(err_msg), color=int('ff0000', 16))
+        await ctx.send(embed=embd)
 
 # role add/unadd commands
 @role.command(name="add")
 @commands.check(check_user)
-async def role_add(ctx):
-    ctx.send("make role assignable")
+async def role_add(ctx, *args):
+    if (ctx.guild):
+        err = False
+        end = False
+        err_msg = ""
+        end_msg = ""
+
+        for role in args:
+            r = await find_role(ctx, role)
+            if(len(r) > 1):
+                await ctx.send(embed=discord.Embed(description=await list_duplicates(r)))
+                return
+            if (r):
+                if (not (await roles.is_assignable(r[0].id))):
+                    await roles.add_row(ctx, r[0])
+
+                end = True
+                end_msg = end_msg + r[0].name + ", "
+            else:
+                err = True
+                err_msg = err_msg + role + ", "
+
+        if (end):
+            embd = discord.Embed(description="Role(s) **{}** are now user-assignable".format(end_msg))
+            await ctx.send(embed=embd)
+        if (err):
+            embd = discord.Embed(description="Role(s) **{}** not found!".format(err_msg))
+            await ctx.send(embed=embd)
 
 @role.command(name="unadd")
 @commands.check(check_user)
-async def role_unadd(ctx):
-    ctx.send("make role unassignable")
+async def role_unadd(ctx, *args):
+    if (ctx.guild):
+        err = False
+        err_msg = ""
+        end_msg = ""
+
+        for role in args:
+            r = await find_role(ctx, role)
+            if(len(r) > 1):
+                await ctx.send(embed=discord.Embed(description=await list_duplicates(r)))
+                return
+            if (r):
+                await roles.delete_row(ctx, r[0])
+
+                end = True
+                end_msg = end_msg + r[0].name + ", "
+            else:
+                err = True
+                err_msg = err_msg + role + ", "
+
+        if (end):
+            await ctx.send(embed=discord.Embed(description="Role(s) **{}** are now unassignable".format(end_msg)))
+        if (err):
+            await ctx.send(embed=discord.Embed(description="Role(s) **{}** not found!".format(err_msg)))
     
 # role list group
 @role.group(name="list")
-async def role_list(ctx):
-    if ctx.invoked_subcommand is not None:
-        return
-    await ctx.send("list assignable roles")
+async def role_list(ctx, pg=0):
+    if ctx.invoked_subcommand is None:
+        if (ctx.guild):
+            role_list = await roles.get_assignable_roles(int(ctx.guild.id))
+            num_roles = len(role_list)
 
-@role_list.command("all")
-async def role_list_all(ctx):
-    await ctx.send("list all roles")
+            if (len(role_list) == 0):
+                await ctx.send(embed=discord.Embed(description="**No assignable roles!**"))
+            else:
+                role_list = list(split_roles(role_list, 15))
+                rs = len(role_list)
+                n = pg
 
+                if (n > rs):
+                    n = rs - 1
+                if (n < 0):
+                    n = 0
+
+                msg = "```"
+                for row in role_list[n]:
+                    msg = msg + "\"" + row + "\" \n"
+                msg = msg + "```"
+                embd = discord.Embed(description="**{} Roles that can be self-assigned: (Page {}/{})**\n{}".format(num_roles, n + 1, rs, msg))
+                await ctx.send(embed=embd)
+
+@role.command(name="listall")
+async def role_list_all(ctx, pg=0):
+    if (ctx.guild):
+        role_list = list(split_roles(ctx.guild.roles, 15))
+        num_roles = len(ctx.guild.roles) - 1
+        
+        rs = len(role_list)
+        n = pg
+        if (n > rs):
+            n = rs - 1
+        if (n < 0):
+            n = 0
+
+        msg = await gen_role_list(role_list, n)
+        
+        if(num_roles == 0):
+            await ctx.send(embed=discord.Embed(description="**Server has no roles!**"))
+            return
+        
+        embd = discord.Embed(description="**{} Roles (Page {}\{}):**\n{}".format(
+            num_roles, n + 1, rs, msg))
+        await ctx.send(embed=embd)
 
 
 # @bot.command(name="roleedit", help="Edit a role")
@@ -405,48 +601,43 @@ async def role_list_all(ctx):
 #             await ctx.send("Roles **{}** not found!".format(err_msg))
 
 
-# @bot.command(name="iamnot", help="Remove a role from yourself")
-# @commands.check(check_user)
-# async def remove_role(ctx, *args):
-#     if (ctx.guild):
-#         r = await find_role(ctx, ' '.join(args))
-#         if(len(r) > 1):
-#             await ctx.send(await list_duplicates(r))
-#             return
-#         if (r):
-#             try:
-#                 await ctx.author.remove_roles(r[0])
-#             except:
-#                 await ctx.send("Error removing the **{}** role!".format(r[0].name)
-#                                )
-#                 return
-#             await ctx.send("Removed the **{}** role!".format(r[0].name))
-#         else:
-#             await ctx.send("Role **{}** not found!".format(' '.join(args)))
+@bot.command(name="iamnot", help="Remove a role from yourself")
+@commands.check(check_user)
+async def remove_role(ctx, *args):
+    if (ctx.guild):
+        r = await find_role(ctx, ' '.join(args))
+        if(len(r) > 1):
+            await ctx.send(embed=discord.Embed(description=await list_duplicates(r)))
+            return
+        if (r):
+            try:
+                await ctx.author.remove_roles(r[0])
+            except:
+                await ctx.send(embed=discord.Embed(description="Error removing the **{}** role!".format(r[0].name), color=r[0].color))
+                return
+            await ctx.send(embed=discord.Embed(description="Removed the **{}** role!".format(r[0].name), color=r[0].color))
+        else:
+            await ctx.send(embed=discord.Embed(description="Role **{}** not found!".format(' '.join(args))))
 
-
-# # TODO: MAKE FUNNY
-
-# @bot.command(name="iam", help="Give yourself a role")
-# async def give_role(ctx, *args):
-    # if (ctx.guild):
-    #     r = await find_role(ctx, ' '.join(args))
-    #     if(len(r) > 1):
-    #         await ctx.send(await list_duplicates(r))
-    #         return
-    #     if (r):
-    #         if await roles.is_assignable(r[0].id):
-    #             try:
-    #                 await ctx.author.add_roles(r[0])
-    #             except:
-    #                 await ctx.send("You can't have the **{}** role!".format(
-    #                     r[0].name))
-    #                 return
-    #             await ctx.send("You now have the **{}** role!".format(r[0].name))
-    #         else:
-    #             await ctx.send("You can't have the **{}** role!".format(r[0].name))
-    #     else:
-            # await ctx.send("Role **{}** not found!".format(' '.join(args)))
+@bot.command(name="iam", help="Give yourself a role")
+async def give_role(ctx, *args):
+    if (ctx.guild):
+        r = await find_role(ctx, ' '.join(args))
+        if(len(r) > 1):
+            await ctx.send(embed=discord.Embed(await list_duplicates(r)))
+            return
+        if (r):
+            if await roles.is_assignable(r[0].id):
+                try:
+                    await ctx.author.add_roles(r[0])
+                except:
+                    await ctx.send(embed=discord.Embed(description="You can't have the **{}** role!".format(r[0].name)))
+                    return
+                await ctx.send(embed=discord.Embed(description="You now have the **{}** role!".format(r[0].name), color=r[0].color))
+            else:
+                await ctx.send(embed=discord.Embed(description="You can't have the **{}** role!".format(r[0].name), color=r[0].color))
+        else:
+            await ctx.send(embed=discord.Embed(description="Role **{}** not found!".format(' '.join(args))))
 
 
 ## END ROLE COMMANDS
