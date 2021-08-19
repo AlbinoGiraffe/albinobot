@@ -418,7 +418,6 @@ async def role_list_all(ctx, pg=0):
         await ctx.send(embed=embd)
 
 @bot.command(name="iamnot", help="Remove a role from yourself")
-@commands.check(check_user)
 async def remove_role(ctx, *args):
     if (ctx.guild):
         r = await find_role(ctx, ' '.join(args))
