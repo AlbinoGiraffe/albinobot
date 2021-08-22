@@ -36,6 +36,7 @@ cb = CleverWrap(str(cb_api_key))
 
 # set up discord api client
 bot_intents = discord.Intents.default()
+bot_intents.members = True
 bot = discord.Client(intents=bot_intents)
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
@@ -78,6 +79,11 @@ async def log(type, message):
         print("[{}] Error Deleting! ({}, #{})".format(
                     datetime.now().isoformat(sep=' ', timespec='seconds'),
                     message.guild.name, message.channel.name))
+    if(type == 'join'):
+        print("[{}] Member joined ({}, {})".format(
+                    datetime.now().isoformat(sep=' ', timespec='seconds'),
+                    message.guild.name,
+                    message.name))
 
 
 # clean messages for cleverbot
@@ -770,5 +776,12 @@ async def on_message_delete(message):
         del snipe_message_id[message.channel.id]
     except:
         return
-        
+
+@bot.event
+async def on_member_join(member):
+    # log('join', member)
+    print("joined")
+    await member.send("Welcome {}!".format(member.mention))
+
+
 bot.run(discord_token)
