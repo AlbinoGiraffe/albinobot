@@ -36,7 +36,7 @@ cb = CleverWrap(str(cb_api_key))
 
 # set up discord api client
 bot_intents = discord.Intents.default()
-bot_intents.members = True
+bot_intents.Members = True
 bot = discord.Client(intents=bot_intents)
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
 
