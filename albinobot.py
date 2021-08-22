@@ -36,9 +36,8 @@ cb = CleverWrap(str(cb_api_key))
 
 # set up discord api client
 bot_intents = discord.Intents.default()
-bot_intents.Members = True
-bot = discord.Client(intents=bot_intents)
-bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id)
+bot_intents.members = True
+bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id, intents=bot_intents)
 
 # message snipe setup
 snipe_message_author = {}
@@ -65,7 +64,6 @@ async def log(type, message):
         print('[{0}] Message Deleted: \'{1}\' {2}'.format(
             message.created_at.isoformat(sep=' ', timespec='seconds'),
             message.content, message.author.name))
-    
     # errors
     if (type == 'pin_error'):
         print("[{}] Error Pinning! ({}, #{})".format(
@@ -80,10 +78,11 @@ async def log(type, message):
                     datetime.now().isoformat(sep=' ', timespec='seconds'),
                     message.guild.name, message.channel.name))
     if(type == 'join'):
-        print("[{}] Member joined ({}, {})".format(
+        print("[{}] Member joined ({}, {}#{})".format(
                     datetime.now().isoformat(sep=' ', timespec='seconds'),
                     message.guild.name,
-                    message.name))
+                    message.name,
+                    message.discriminator))
 
 
 # clean messages for cleverbot
@@ -779,9 +778,9 @@ async def on_message_delete(message):
 
 @bot.event
 async def on_member_join(member):
-    # log('join', member)
-    print("joined")
-    await member.send("Welcome {}!".format(member.mention))
+    await log('join', member)
+    channel = member.guild.system_channel
+    await channel.send("Welcome {}!".format(member.mention))
 
 
 bot.run(discord_token)
