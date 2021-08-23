@@ -20,6 +20,7 @@ Bot configuration is taken care of in a .env file placed in the same folder as '
 DISCORD_TOKEN="12345678"
 PREFIX="."
 ADMIN_ID="12345678"
+CB_API_KEY="12345678"
 ```
 
 ## Running
