@@ -1,3 +1,4 @@
+from discord.activity import Spotify
 import starboard as sb
 import roles
 
@@ -12,6 +13,7 @@ import asyncio
 
 from datetime import datetime
 from discord.ext import commands
+from discord.ext import tasks
 from udpy import UrbanClient
 from cleverwrap import CleverWrap
 
@@ -34,7 +36,9 @@ cb = CleverWrap(str(cb_api_key))
 # set up discord api client
 bot_intents = discord.Intents.default()
 bot_intents.members = True
+bot_intents.presences = True
 bot = commands.Bot(command_prefix=c_prefix, owner_id=admin_id, intents=bot_intents)
+default_activity = ""
 
 # message snipe setup
 snipe_message_author = {}
@@ -457,13 +461,25 @@ async def give_role(ctx, *args):
 
 ## END ROLE COMMANDS
 
+# Automatically update to owner's music
+@bot.command(name="us", hidden=True)
+@commands.check(check_user)
+async def init_song(ctx):
+    update_song.start(ctx.author)
+
+@tasks.loop(minutes=2)
+async def update_song(user):
+    if isinstance(user.activity, Spotify):
+        await bot.change_presence(activity=discord.Game(name="{} - {}".format(user.activity.artist, user.activity.title)))
+    else:
+        await bot.change_presence(activity=discord.Game(name=default_activity))
 
 # Change game status
 @bot.command(name="gs", help="Update bot's status")
 @commands.check(check_user)
 async def update_gs(ctx, *args):
+    default_activity = ' '.join(args)
     await bot.change_presence(activity=discord.Game(name=' '.join(args)))
-
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
@@ -776,6 +792,5 @@ async def on_member_join(member):
     await log('join', member)
     channel = member.guild.system_channel
     await channel.send("Welcome {}!".format(member.mention))
-
 
 bot.run(discord_token)
