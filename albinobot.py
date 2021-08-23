@@ -1,6 +1,3 @@
-from asyncio.events import AbstractEventLoopPolicy
-from discord import embeds
-from discord.ext.commands.core import check
 import starboard as sb
 import roles
 
@@ -161,7 +158,6 @@ async def find_role(ctx, n):
 
     return result
 
-
 async def list_duplicates(roles):
     msg = "**Duplicate roles! Use role IDs instead**\n"
     for r in roles:
@@ -169,7 +165,7 @@ async def list_duplicates(roles):
     return msg
 
 # role parent group
-@bot.group()
+@bot.group(help="Role management")
 async def role(ctx):
     embd = None
     if ctx.invoked_subcommand is None:
@@ -188,7 +184,7 @@ async def role(ctx):
         await ctx.send(embed=embd)
 
 # role edit group
-@role.group(name="edit")
+@role.group(name="edit", help="Edit role attributes <color, name>")
 @commands.check(check_user)
 async def role_edit(ctx):
     if ctx.invoked_subcommand is None:
@@ -197,7 +193,7 @@ async def role_edit(ctx):
                                 "name  [role name/id] [new role name]\n")
         await ctx.send(embed=embd)
 
-@role_edit.command(name="color")
+@role_edit.command(name="color", help="Edit role color <role id/name> <hex/int color>")
 @commands.check(check_user)
 async def role_edit_color(ctx, rn, *args):
     embd = None
@@ -225,7 +221,7 @@ async def role_edit_color(ctx, rn, *args):
         await ctx.send(embed=embd)
     
 
-@role_edit.command(name="name")
+@role_edit.command(name="name", help="Edit role name <role id/name> <new name>")
 @commands.check(check_user)
 async def role_edit_name(ctx, n, *args):
     embd = None
@@ -249,9 +245,8 @@ async def role_edit_name(ctx, n, *args):
     
         await ctx.send(embed=embd)
         
-
 # role create/delete commands 
-@role.command(name="create")
+@role.command(name="create", help="Create a role <role name>")
 @commands.check(check_user)
 async def role_create(ctx, *args):
     if (ctx.guild):
@@ -278,7 +273,7 @@ async def role_create(ctx, *args):
         embd = discord.Embed(description="Role(s) **{}** not created!".format(err_msg), color=int('ff0000', 16))
         await ctx.send(embed=embd)
 
-@role.command(name="delete")
+@role.command(name="delete", help="Delete a role <role id/name>")
 @commands.check(check_user)
 async def role_delete(ctx, *args):
     if (ctx.guild):
@@ -313,7 +308,7 @@ async def role_delete(ctx, *args):
         await ctx.send(embed=embd)
 
 # role add/unadd commands
-@role.command(name="add")
+@role.command(name="add", help="Make a role assignable <role id/name>")
 @commands.check(check_user)
 async def role_add(ctx, *args):
     if (ctx.guild):
@@ -344,7 +339,7 @@ async def role_add(ctx, *args):
             embd = discord.Embed(description="Role(s) **{}** not found!".format(err_msg))
             await ctx.send(embed=embd)
 
-@role.command(name="unadd")
+@role.command(name="unadd", help="Make a role unassignable <role id/name>")
 @commands.check(check_user)
 async def role_unadd(ctx, *args):
     if (ctx.guild):
@@ -372,7 +367,7 @@ async def role_unadd(ctx, *args):
             await ctx.send(embed=discord.Embed(description="Role(s) **{}** not found!".format(err_msg)))
     
 # role list group
-@role.group(name="list")
+@role.group(name="list", help="List assignable roles <page number>")
 async def role_list(ctx, pg=0):
     if ctx.invoked_subcommand is None:
         if (ctx.guild):
@@ -398,7 +393,7 @@ async def role_list(ctx, pg=0):
                 embd = discord.Embed(description="**{} Roles that can be self-assigned: (Page {}/{})**\n{}".format(num_roles, n + 1, rs, msg))
                 await ctx.send(embed=embd)
 
-@role.command(name="listall")
+@role.command(name="listall", help="List all roles on the server <page number>")
 async def role_list_all(ctx, pg=0):
     if (ctx.guild):
         role_list = list(split_roles(ctx.guild.roles, 15))
@@ -422,7 +417,7 @@ async def role_list_all(ctx, pg=0):
             num_roles, n + 1, rs, msg))
         await ctx.send(embed=embd)
 
-@bot.command(name="iamnot", help="Remove a role from yourself")
+@bot.command(name="iamnot", help="Remove a role from yourself <role id/name>")
 async def remove_role(ctx, *args):
     if (ctx.guild):
         r = await find_role(ctx, ' '.join(args))
@@ -439,7 +434,7 @@ async def remove_role(ctx, *args):
         else:
             await ctx.send(embed=discord.Embed(description="Role **{}** not found!".format(' '.join(args))))
 
-@bot.command(name="iam", help="Give yourself a role")
+@bot.command(name="iam", help="Give yourself a role <role id/name>")
 async def give_role(ctx, *args):
     if (ctx.guild):
         r = await find_role(ctx, ' '.join(args))

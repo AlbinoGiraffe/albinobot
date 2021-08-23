@@ -21,21 +21,27 @@ DISCORD_TOKEN="12345678"
 PREFIX="."
 ADMIN_ID="12345678"
 ```
+
 ## Running
+
 Simply run it with python 3.
 
 ---
 
 ## Stuff it can do (as of now)
 
-### User Commands:
+### User Commands
 
 - Pin messages after a certain reaction threshold
 - Simple Star Board
 - Cleverbot integration
 - Send uwuified messages
+- UrbanDictionary definitions
 - Simple Yes,No,Maybe RNG function
 - User-assignable roles (```.iam Epic```)
+- Recently deleted message sniping (```pls snipe```)
+- Saying 'what' in chat emphasizes the last message sent
+- Member join messages
 
 ### Admin Commands
 
@@ -45,11 +51,13 @@ Simply run it with python 3.
 - Make bot reply to a message
 - Make bot say something
 - Create/Edit/Delete roles
-- Manage assignable roles
+- Manage roles
+- Change bot's game status
 
 ---
 
 ## Command Guide
+
 Change Command Prefix:
 > .cp \<new prefix>
 
@@ -83,36 +91,46 @@ Send uwuified message:
 Get the Urban Dictionary defintion of a word:
 > .ud \<word>
 
+Change Bot's game activity
+> .gs \<activity name>
+
+Get an urban dictionary definition
+> .ud \<word>
+
 ---
 
 ## Role Commands
 
-*All assignable roles for **all** servers are stored in a ```roles.csv``` in the parent directory.*
+*All assignable roles for **all** servers are stored in a ```roles.csv``` in the parent directory. This might change once I get better at data storage.*
 
+**role names can be substituted for role IDs**
 
-Edit role(s) (currently only changing the color is supported)
-> .roleedit color \<hex or int color value> <role(s)>
+Edit role color
+> .role edit color \<role name> \<hex or int color value>
+
+Edit role name
+> .role edit name \<role name> \<new role name>
 
 Create a role (creates a role with default values)
-> .rolecreate \<role name>
+> .role create \<role name>
 
 Delete a role
-> .roledelete \<role name or id>
+> .role delete \<role name or id>
 
 List all server roles
-> .rolelistall \<page number (optional)>
+> .role listall \<page number (optional)>
 
 List all user-assignable roles
-> .rolelist \<page number>
+> .role list \<page number>
 
 Add role(s) to the user-asignable list
-> .roleadd \<role name(s)>
+> .role add \<role name(s)>
 
 Remove role(s) from the user-asignable list
-> .roleunadd \<role name(s)>
+> .role unadd \<role name(s)>
 
 Add a role to yourself
 > .iam \<role name>
 
 Remove a role(s) from yourself
-> .iam \<role name>
+> .iamnot \<role name>
