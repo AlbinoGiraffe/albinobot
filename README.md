@@ -50,6 +50,7 @@ Simply run it with python 3.
 ---
 
 ## Command Guide
+
 Change Command Prefix:
 > .cp \<new prefix>
 
