@@ -470,7 +470,7 @@ async def init_song(ctx):
 @tasks.loop(minutes=2)
 async def update_song(user):
     if isinstance(user.activity, Spotify):
-        await bot.change_presence(activity=discord.ActivityType.listening, name="{} - {}".format(user.activity.artist, user.activity.title))
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="{} - {}".format(user.activity.artist, user.activity.title)))
     else:
         await bot.change_presence(activity=discord.Game(name=default_activity))
 
@@ -486,7 +486,7 @@ async def update_gs(ctx, *args):
 @commands.check(check_user)
 async def update_gs(ctx, *args):
     default_activity = ' '.join(args)
-    await bot.change_presence(activity=discord.ActivityType.listening, name=' '.join(args))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=' '.join(args))
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
