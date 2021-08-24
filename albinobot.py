@@ -748,7 +748,7 @@ async def on_raw_reaction_add(payload):
             # ignore reactions in board channel
             if (channel.id == board.id):
                 return
-            if reaction and reaction.count > 1:
+            if reaction and reaction.count > 2:
                 board_id = await sb.check_board(message.id)  # check if message is already on board
                 embed = await board_embed(message, reaction)  # generate embed
 
