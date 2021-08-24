@@ -486,7 +486,7 @@ async def update_gs(ctx, *args):
 @commands.check(check_user)
 async def update_gs(ctx, *args):
     default_activity = ' '.join(args)
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=' '.join(args))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=' '.join(args)))
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
