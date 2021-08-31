@@ -654,7 +654,7 @@ async def on_message(message):
         return
 
     if message.content.startswith("="):
-        expr = message.content.replace("=")
+        expr = message.content.replace("=",'')
         await message.reply(str(sp(expr)))
         return
 
