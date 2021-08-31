@@ -1,4 +1,5 @@
 from discord.activity import Spotify
+from discord.ext.commands.core import check
 import starboard as sb
 import roles
 
@@ -488,23 +489,6 @@ async def update_gs(ctx, *args):
     default_activity = ' '.join(args)
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=' '.join(args)))
 
-# Urban Dictionary
-@bot.command(name="ud", help="Get an urdban dictionary definition")
-async def urban_define(ctx, *args):
-    defs = ud_client.get_definition(' '.join(args))
-    if (len(defs) == 0):
-        embd = discord.Embed(title="Error Getting Word",
-                             description="Maybe it doesn't exist on UD?")
-        await ctx.send(embed=embd)
-    else:
-        result = defs[0]
-        embd = discord.Embed(title=result.word,
-                             description=result.definition,
-                             color=0xe74c3c)
-        embd.set_footer(text="Example:\n" + result.example)
-        await ctx.send(embed=embd)
-
-
 # set command prefix eg. ".gb"
 @bot.command(name="cp", help="Change the command prefix")
 @commands.check(check_user)
@@ -578,6 +562,31 @@ async def uwu(ctx, *args):
     await delete_message(ctx.message)
     await ctx.send(uwuify.uwu(new_message))
 
+# anti snipe
+@bot.command(name="as", hidden=True)
+@commands.check(check_user)
+async def anti_snipe(ctx):
+    snipe_message_author[ctx.channel.id] = ""
+    snipe_message_content[ctx.channel.id] = ""
+    snipe_message_date[ctx.channel.id] = ""
+    snipe_message_id[ctx.channel.id] = ""
+
+
+# Urban Dictionary
+@bot.command(name="ud", help="Get an urdban dictionary definition")
+async def urban_define(ctx, *args):
+    defs = ud_client.get_definition(' '.join(args))
+    if (len(defs) == 0):
+        embd = discord.Embed(title="Error Getting Word",
+                             description="Maybe it doesn't exist on UD?")
+        await ctx.send(embed=embd)
+    else:
+        result = defs[0]
+        embd = discord.Embed(title=result.word,
+                             description=result.definition,
+                             color=0xe74c3c)
+        embd.set_footer(text="Example:\n" + result.example)
+        await ctx.send(embed=embd)
 
 # RNG bot
 @bot.command(name='gb', help="Pick something")
@@ -601,7 +610,6 @@ async def ping(ctx):
     await ctx.send("Pong!")
 
 
-# get bot's datetime
 @bot.command(name="time", help="Get bot's time")
 async def get_time(ctx):
     await ctx.trigger_typing()
