@@ -11,6 +11,7 @@ import dotenv
 import time
 import re
 import asyncio
+import simpleeval as sp
 
 from datetime import datetime
 from discord.ext import commands
@@ -650,6 +651,11 @@ async def on_ready():
 async def on_message(message):
     # check for recursion
     if message.author == bot.user:
+        return
+
+    if message.content.startswith("="):
+        expr = message.content.replace("=")
+        await message.reply(str(sp(expr)))
         return
 
     # snipe messages
