@@ -11,13 +11,14 @@ import dotenv
 import time
 import re
 import asyncio
-import simpleeval as sp
+
 
 from datetime import datetime
 from discord.ext import commands
 from discord.ext import tasks
 from udpy import UrbanClient
 from cleverwrap import CleverWrap
+from simpleeval import simple_eval as sp
 
 # time bot startup
 start = time.time()
