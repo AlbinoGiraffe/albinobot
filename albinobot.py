@@ -470,16 +470,23 @@ async def init_song(ctx):
 @tasks.loop(minutes=2)
 async def update_song(user):
     if isinstance(user.activity, Spotify):
-        await bot.change_presence(activity=discord.Game(name="{} - {}".format(user.activity.artist, user.activity.title)))
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="{} - {}".format(user.activity.artist, user.activity.title)))
     else:
         await bot.change_presence(activity=discord.Game(name=default_activity))
 
 # Change game status
-@bot.command(name="gs", help="Update bot's status")
+@bot.command(name="gs", help="Update bot's game status")
 @commands.check(check_user)
 async def update_gs(ctx, *args):
     default_activity = ' '.join(args)
     await bot.change_presence(activity=discord.Game(name=' '.join(args)))
+
+# Change listening status
+@bot.command(name="ls", help="Update bot's listening status")
+@commands.check(check_user)
+async def update_gs(ctx, *args):
+    default_activity = ' '.join(args)
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=' '.join(args)))
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
@@ -748,7 +755,7 @@ async def on_raw_reaction_add(payload):
             # ignore reactions in board channel
             if (channel.id == board.id):
                 return
-            if reaction and reaction.count > 1:
+            if reaction and reaction.count > 2:
                 board_id = await sb.check_board(message.id)  # check if message is already on board
                 embed = await board_embed(message, reaction)  # generate embed
 
