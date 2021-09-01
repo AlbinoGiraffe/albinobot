@@ -812,7 +812,7 @@ async def on_message_delete(message):
 @bot.event
 async def on_member_join(member):
     await log('join', member)
-    channel = member.guild.system_channel
-    await channel.send("Welcome {}!".format(member.mention))
+    # channel = member.guild.system_channel
+    # await channel.send("Welcome {}!".format(member.mention))
 
 bot.run(discord_token)
