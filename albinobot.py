@@ -481,8 +481,15 @@ async def update_song(user):
 @bot.command(name="gs", help="Update bot's game status")
 @commands.check(check_user)
 async def update_gs(ctx, *args):
+    global default_activity 
     default_activity = ' '.join(args)
-    await bot.change_presence(activity=discord.Game(name=' '.join(args)))
+    
+    await bot.change_presence(activity=discord.Game(name=default_activity))
+    if default_activity == "":
+        embd = discord.Embed(title=f"Cleared bot status")
+    else:
+        embd = discord.Embed(title=f"Updated bot status to {default_activity}")
+    await ctx.send(embed=embd)
 
 # Change listening status
 @bot.command(name="ls", help="Update bot's listening status")
@@ -573,6 +580,18 @@ async def anti_snipe(ctx):
     snipe_message_date[ctx.channel.id] = ""
     snipe_message_id[ctx.channel.id] = ""
 
+@bot.command(name="s", help="Snipe a deleted message")
+@commands.check(check_user)
+async def anti_snipe(ctx):
+    channel = ctx.channel
+    try:
+        embed = discord.Embed(title=f"{snipe_message_author[channel.id]} deleted a message", color=0xe74c3c)
+        embed.add_field(name="Message:", value=snipe_message_content[channel.id], inline=True)
+        embed.set_footer(text=f"id: {snipe_message_id[channel.id]} | {snipe_message_date[channel.id]} | #{channel.name}")
+        await channel.send(embed=embed)
+    except:
+        await channel.send("No message to snipe!")
+        return
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
@@ -666,9 +685,9 @@ async def on_message(message):
             embed = discord.Embed(title=f"{snipe_message_author[channel.id]} deleted a message", color=0xe74c3c)
             embed.add_field(name="Message:", value=snipe_message_content[channel.id], inline=True)
             embed.set_footer(text=f"id: {snipe_message_id[channel.id]} | {snipe_message_date[channel.id]} | #{channel.name}")
-            await message.channel.send(embed=embed)
+            await channel.send(embed=embed)
         except:
-            await message.channel.send("No message to snipe!")
+            await channel.send("No message to snipe!")
             return
 
     # log messages
