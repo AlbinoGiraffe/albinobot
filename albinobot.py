@@ -644,16 +644,6 @@ async def github(ctx):
     await ctx.trigger_typing()
     await ctx.send("https://github.com/AlbinoGiraffe/AlbinoBot")
 
-
-# the funny
-@bot.command(help="the funny")
-async def pdf(ctx):
-    await ctx.trigger_typing()
-    dad = await bot.fetch_user(654564428150472714)
-    await ctx.send("{} pdf file 😳".format(dad.mention))
-    await delete_message(ctx.message)
-
-
 @bot.event
 async def on_connect():
     print('\nBot connected')
