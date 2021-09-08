@@ -581,8 +581,7 @@ async def anti_snipe(ctx):
     snipe_message_id[ctx.channel.id] = ""
 
 @bot.command(name="s", help="Snipe a deleted message")
-@commands.check(check_user)
-async def anti_snipe(ctx):
+async def snipe(ctx):
     channel = ctx.channel
     try:
         embed = discord.Embed(title=f"{snipe_message_author[channel.id]} deleted a message", color=0xe74c3c)
