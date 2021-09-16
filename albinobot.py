@@ -635,7 +635,7 @@ async def get_scores(ctx):
     # await ctx.send(scores)
     for row in scores:
         u = await bot.fetch_user(row[0])
-        new_scores.append([u.name, row[1]])
+        new_scores.append([u.display_name, row[1]])
     # await ctx.send(new_scores)
     
     x = []
