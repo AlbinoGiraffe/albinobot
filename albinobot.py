@@ -2,6 +2,7 @@ from discord.activity import Spotify
 from discord.ext.commands.core import check
 import starboard as sb
 import roles
+import economy as ec
 
 import uwuify
 import discord
@@ -580,6 +581,7 @@ async def anti_snipe(ctx):
     snipe_message_date[ctx.channel.id] = ""
     snipe_message_id[ctx.channel.id] = ""
 
+<<<<<<< HEAD
 @bot.command(name="s", help="Snipe a deleted message")
 async def snipe(ctx):
     channel = ctx.channel
@@ -591,6 +593,45 @@ async def snipe(ctx):
     except:
         await channel.send("No message to snipe!")
         return
+=======
+## ECONOMY COMMANDS
+@bot.command(name="untrack", hidden=True)
+@commands.check(check_user)
+async def untrack_user(ctx, user: discord.User):
+    if(await ec.is_tracked(ctx.guild.id, user.id)):
+        await ec.delete_row(ctx.guild.id, user.id)
+        await ctx.send(f"No longer tracking {user.mention}.")
+
+@bot.command(name="track", hidden=True)
+@commands.check(check_user)
+async def track_user(ctx, user: discord.User, cred=1000):
+    if(not await ec.is_tracked(ctx.guild.id, user.id)):
+        await ec.add_row(ctx.guild.id, user.id, cred)
+        await ctx.send(f"Now tracking {user.mention} with {cred} credits.")
+
+@bot.command(name="updatecreds", hidden=True)
+@commands.check(check_user)
+async def update_user_credits(ctx, user: discord.User, cred: int):
+    await ec.update_cred(ctx.guild.id, user.id, cred)
+    await ctx.send(f"Gave {user.mention} {cred} credits.")
+
+@bot.command(name="cc")
+async def check_user_credits(ctx, user: discord.User):
+    if(await ec.is_tracked(ctx.guild.id, user.id)):
+        await ctx.reply(f"{user.mention} has {await ec.get_cred(ctx.guild.id, user.id)} credits.")
+    else:
+        await ctx.send(f"{user.mention} isn't tracked!")
+
+@bot.command(name="credits")
+async def check_credits(ctx):
+    if(await ec.is_tracked(ctx.guild.id, ctx.author.id)):
+        await ctx.reply(f"You have {await ec.get_cred(ctx.guild.id, ctx.author.id)} credits")
+    else:
+        await ctx.send(f"You aren't being tracked!")
+
+## END ECONOMY COMMANDS
+
+>>>>>>> d8691e51984101165a31326dda9217f5494e0bd4
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
@@ -662,11 +703,26 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
+<<<<<<< HEAD
     if message.content.startswith("="):
         expr = message.content.replace("=",'')
         await message.reply(str(sp(expr)))
         return
 
+=======
+    # tracking
+    if(await ec.is_tracked(message.guild.id, message.author.id)):
+        emotion = await ec.process_text(message.content)
+        cred = 0
+        if(emotion[0] > emotion[1]):
+            cred = -int(emotion[0] * 100)
+            # await message.channel.send(f"Removed {-cred} credits from {message.author.mention}")
+        if(emotion[0] < emotion[1]):
+            cred = int(emotion[1] * 100)
+            # await message.channel.send(f"Added {cred} credits to {message.author.mention}")
+        await ec.update_cred(message.guild.id, message.author.id, cred)    
+    
+>>>>>>> d8691e51984101165a31326dda9217f5494e0bd4
     # snipe messages
     if message.content.lower() == "pls snipe":
         channel = message.channel
