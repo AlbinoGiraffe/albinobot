@@ -12,7 +12,7 @@ import dotenv
 import time
 import re
 import asyncio
-
+import matplotlib.pyplot as plt
 
 from datetime import datetime
 from discord.ext import commands
@@ -628,6 +628,32 @@ async def check_credits(ctx):
     else:
         await ctx.send(f"You aren't being tracked on this server!")
 
+@bot.command(name="scores")
+async def get_scores(ctx):
+    new_scores = []
+    scores = await ec.get_user_list(ctx.guild.id)
+    # await ctx.send(scores)
+    for row in scores:
+        u = await bot.fetch_user(row[0])
+        new_scores.append([u.name, row[1]])
+    await ctx.send(new_scores)
+    
+    x = []
+    ypos = []
+    for i in new_scores:
+        x.append(i[0])
+    for i in new_scores:
+        ypos.append(i[1])
+    xpos = [i for i, _ in enumerate(x)]
+
+    plt.bar(xpos, ypos)
+    plt.ylabel('Score')
+    plt.xlabel('Members')
+    plt.title('Social Credit Scores')
+    plt.xticks(xpos, x)
+    plt.savefig(f"{ctx.guild.id}.png")
+    await ctx.send(file=discord.File(f"{ctx.guild.id}.png"))
+    
 ## END ECONOMY COMMANDS
 
 

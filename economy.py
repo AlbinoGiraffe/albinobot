@@ -3,6 +3,7 @@ import csv
 import shutil
 import tempfile
 import pandas as pd
+from pandas.io.parsers.readers import MANDATORY_DIALECT_ATTRS
 import text2emotion as te
 from tempfile import NamedTemporaryFile
 
@@ -79,3 +80,13 @@ async def process_text(text):
     # print(f"Avg Negative: {neg}")
     # print(f"Avg Positive: {pos}")
     return [neg, pos]
+
+async def get_user_list(sid):
+    scores = []
+    df = pd.read_csv("socialcredit.csv")
+    for index in df.index:
+        if(df.loc[index, 'SERVER_ID'] == sid):
+            scores.append([df.loc[index, 'MEMBER_ID'], df.loc[index, 'CREDIT']])
+    return scores
+            
+
