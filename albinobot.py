@@ -592,7 +592,7 @@ async def snipe(ctx):
     except:
         await channel.send("No message to snipe!")
         return
-        
+
 ## ECONOMY COMMANDS
 @bot.command(name="untrack", hidden=True)
 @commands.check(check_user)
@@ -619,14 +619,14 @@ async def check_user_credits(ctx, user: discord.User):
     if(await ec.is_tracked(ctx.guild.id, user.id)):
         await ctx.reply(f"{user.mention} has {await ec.get_cred(ctx.guild.id, user.id)} credits.")
     else:
-        await ctx.send(f"{user.mention} isn't tracked!")
+        await ctx.send(f"{user.mention} isn't tracked on this server!")
 
 @bot.command(name="credits")
 async def check_credits(ctx):
     if(await ec.is_tracked(ctx.guild.id, ctx.author.id)):
         await ctx.reply(f"You have {await ec.get_cred(ctx.guild.id, ctx.author.id)} credits")
     else:
-        await ctx.send(f"You aren't being tracked!")
+        await ctx.send(f"You aren't being tracked on this server!")
 
 ## END ECONOMY COMMANDS
 
