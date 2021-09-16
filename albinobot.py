@@ -644,8 +644,9 @@ async def get_scores(ctx):
         x.append(i[0])
     for i in new_scores:
         ypos.append(i[1])
-    xpos = [2 * i for i, _ in enumerate(x)]
+    xpos = [3 * i for i, _ in enumerate(x)]
 
+    plt.figure(figsize=(20, 3))
     plt.bar(xpos, ypos)
     plt.ylabel('Score')
     plt.xlabel('Members')
