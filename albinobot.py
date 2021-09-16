@@ -634,7 +634,7 @@ async def get_scores(ctx):
     scores = await ec.get_user_list(ctx.guild.id)
     # await ctx.send(scores)
     for row in scores:
-        u = await bot.get_user(row[0])
+        u = ctx.message.guild.get_member(row[0])
         new_scores.append([u.display_name, row[1]])
     # await ctx.send(new_scores)
     
