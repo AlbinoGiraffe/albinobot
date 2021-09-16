@@ -644,9 +644,9 @@ async def get_scores(ctx):
         x.append(i[0])
     for i in new_scores:
         ypos.append(i[1])
-    xpos = [i for i, _ in enumerate(x)]
+    xpos = [2 * i for i, _ in enumerate(x)]
 
-    plt.bar(range(len(x)), ypos)
+    plt.bar(xpos, ypos)
     plt.ylabel('Score')
     plt.xlabel('Members')
     plt.title('Social Credit Scores')
