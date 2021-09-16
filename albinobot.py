@@ -636,7 +636,7 @@ async def get_scores(ctx):
     for row in scores:
         u = await bot.fetch_user(row[0])
         new_scores.append([u.name, row[1]])
-    await ctx.send(new_scores)
+    # await ctx.send(new_scores)
     
     x = []
     ypos = []
@@ -646,7 +646,7 @@ async def get_scores(ctx):
         ypos.append(i[1])
     xpos = [3 * i for i, _ in enumerate(x)]
 
-    plt.figure(figsize=(20, 3))
+    plt.figure(figsize=(20, 10))
     plt.bar(xpos, ypos)
     plt.ylabel('Score')
     plt.xlabel('Members')
