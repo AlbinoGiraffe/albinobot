@@ -581,7 +581,6 @@ async def anti_snipe(ctx):
     snipe_message_date[ctx.channel.id] = ""
     snipe_message_id[ctx.channel.id] = ""
 
-<<<<<<< HEAD
 @bot.command(name="s", help="Snipe a deleted message")
 async def snipe(ctx):
     channel = ctx.channel
@@ -593,7 +592,7 @@ async def snipe(ctx):
     except:
         await channel.send("No message to snipe!")
         return
-=======
+        
 ## ECONOMY COMMANDS
 @bot.command(name="untrack", hidden=True)
 @commands.check(check_user)
@@ -631,7 +630,6 @@ async def check_credits(ctx):
 
 ## END ECONOMY COMMANDS
 
->>>>>>> d8691e51984101165a31326dda9217f5494e0bd4
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
@@ -703,13 +701,11 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-<<<<<<< HEAD
     if message.content.startswith("="):
         expr = message.content.replace("=",'')
         await message.reply(str(sp(expr)))
         return
 
-=======
     # tracking
     if(await ec.is_tracked(message.guild.id, message.author.id)):
         emotion = await ec.process_text(message.content)
@@ -722,7 +718,6 @@ async def on_message(message):
             # await message.channel.send(f"Added {cred} credits to {message.author.mention}")
         await ec.update_cred(message.guild.id, message.author.id, cred)    
     
->>>>>>> d8691e51984101165a31326dda9217f5494e0bd4
     # snipe messages
     if message.content.lower() == "pls snipe":
         channel = message.channel
