@@ -574,7 +574,6 @@ async def uwu(ctx, *args):
 
 # anti snipe
 @bot.command(name="as", hidden=True)
-@commands.check(check_user)
 async def anti_snipe(ctx):
     snipe_message_author[ctx.channel.id] = ""
     snipe_message_content[ctx.channel.id] = ""
