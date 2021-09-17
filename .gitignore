@@ -133,7 +133,7 @@ dmypy.json
 
 # Bot config/misc
 # gold.txt
-.log
+*.log
 .old/
 .DS_Store
-.png
+*.png
