@@ -573,7 +573,7 @@ async def uwu(ctx, *args):
     await ctx.send(uwuify.uwu(new_message))
 
 # anti snipe
-@bot.command(name="antisnipe", hidden=True)
+@bot.command(name="antisnipe")
 async def anti_snipe(ctx):
     snipe_message_author[ctx.channel.id] = ""
     snipe_message_content[ctx.channel.id] = ""
