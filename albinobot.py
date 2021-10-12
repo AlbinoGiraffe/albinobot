@@ -454,7 +454,7 @@ async def give_role(ctx, *args):
                 try:
                     await ctx.author.add_roles(r[0])
                 except:
-                    await ctx.send(embed=discord.Embed(description="You can't have the **{}** role!".format(r[0].name)))
+                    await ctx.send(embed=discord.Embed(description="Error giving the **{}** role!".format(r[0].name)))
                     return
                 await ctx.send(embed=discord.Embed(description="You now have the **{}** role!".format(r[0].name), color=r[0].color))
             else:
