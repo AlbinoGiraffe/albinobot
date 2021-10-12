@@ -633,8 +633,11 @@ async def get_scores(ctx):
     scores = await ec.get_user_list(ctx.guild.id)
     # await ctx.send(scores)
     for row in scores:
-        u = ctx.message.guild.get_member(row[0])
-        new_scores.append([u.display_name, row[1]])
+        try:
+            u = ctx.message.guild.get_member(row[0])
+            new_scores.append([u.display_name, row[1]])
+        except:
+            u = "N/A"
     # await ctx.send(new_scores)
     
     x = []
