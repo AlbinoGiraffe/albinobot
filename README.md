@@ -10,6 +10,11 @@ Simple Discord bot written in python using the Discord.py API
 - cleverbotfree
 - udpy (for urban dictionary querying)
 
+**Install Dependencies:**
+```txt
+pip install uwuify discord python-dotenv asyncio matplotlib udpy cleverwrap simpleeval pandas text2emotion
+```
+
 ## Configuration
 
 Bot configuration is taken care of in a .env file placed in the same folder as 'albinobot.py'. In this file, place your token, desired command prefix, and admin user id like so:

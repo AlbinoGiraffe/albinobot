@@ -1,11 +1,8 @@
 import os
 import csv
-import shutil
-import tempfile
 import pandas as pd
 from pandas.io.parsers.readers import MANDATORY_DIALECT_ATTRS
 import text2emotion as te
-from tempfile import NamedTemporaryFile
 
 # get user credit list
 async def get_list():
