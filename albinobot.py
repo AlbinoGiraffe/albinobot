@@ -573,7 +573,7 @@ async def uwu(ctx, *args):
     await ctx.send(uwuify.uwu(new_message))
 
 # anti snipe
-@bot.command(name="antisnipe")
+@bot.command(name="as")
 async def anti_snipe(ctx):
     snipe_message_author[ctx.channel.id] = ""
     snipe_message_content[ctx.channel.id] = ""
@@ -620,14 +620,14 @@ async def check_user_credits(ctx, user: discord.User):
     else:
         await ctx.send(f"{user.mention} isn't tracked on this server!")
 
-@bot.command(name="credits")
+@bot.command(name="credits", help="check user credits")
 async def check_credits(ctx):
     if(await ec.is_tracked(ctx.guild.id, ctx.author.id)):
         await ctx.reply(f"You have {await ec.get_cred(ctx.guild.id, ctx.author.id)} credits")
     else:
         await ctx.send(f"You aren't being tracked on this server!")
 
-@bot.command(name="scores")
+@bot.command(name="scores", help="get scoreboard")
 async def get_scores(ctx):
     new_scores = []
     scores = await ec.get_user_list(ctx.guild.id)
@@ -648,7 +648,7 @@ async def get_scores(ctx):
         ypos.append(i[1])
     xpos = [3 * i for i, _ in enumerate(x)]
 
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(20, 20))
     plt.bar(xpos, ypos)
     plt.ylabel('Score')
     plt.xlabel('Members')
