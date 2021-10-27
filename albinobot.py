@@ -116,8 +116,8 @@ async def delete_message(message):
 
 # generate embed for star board
 async def board_embed(message, reaction):
-    embed = discord.Embed(title=message.content,
-                          description="",
+    embed = discord.Embed(title=message.author,
+                          description=message.content,
                           color=0xe74c3c)
     embed.add_field(name="Jump to Message",
                     value="[Click]({})".format(message.jump_url))
@@ -648,7 +648,7 @@ async def get_scores(ctx):
         ypos.append(i[1])
     xpos = [3 * i for i, _ in enumerate(x)]
 
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(35, 10))
     plt.bar(xpos, ypos)
     plt.ylabel('Score')
     plt.xlabel('Members')
@@ -858,7 +858,7 @@ async def on_raw_reaction_add(payload):
             # ignore reactions in board channel
             if (channel.id == board.id):
                 return
-            if reaction and reaction.count > 2:
+            if reaction and reaction.count > 0:
                 board_id = await sb.check_board(message.id)  # check if message is already on board
                 embed = await board_embed(message, reaction)  # generate embed
 
