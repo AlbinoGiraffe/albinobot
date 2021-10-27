@@ -137,3 +137,5 @@ dmypy.json
 .old/
 .DS_Store
 *.png
+*.csv
+
