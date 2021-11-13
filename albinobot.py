@@ -736,16 +736,19 @@ async def on_message(message):
         return
 
     # tracking
-    if(await ec.is_tracked(message.guild.id, message.author.id)):
-        emotion = await ec.process_text(message.content)
-        cred = 0
-        if(emotion[0] > emotion[1]):
-            cred = -int(emotion[0] * 100)
-            # await message.channel.send(f"Removed {-cred} credits from {message.author.mention}")
-        if(emotion[0] < emotion[1]):
-            cred = int(emotion[1] * 100)
-            # await message.channel.send(f"Added {cred} credits to {message.author.mention}")
-        await ec.update_cred(message.guild.id, message.author.id, cred)    
+    try:
+        if(await ec.is_tracked(message.guild.id, message.author.id)):
+            emotion = await ec.process_text(message.content)
+            cred = 0
+            if(emotion[0] > emotion[1]):
+                cred = -int(emotion[0] * 100)
+                # await message.channel.send(f"Removed {-cred} credits from {message.author.mention}")
+            if(emotion[0] < emotion[1]):
+                cred = int(emotion[1] * 100)
+                # await message.channel.send(f"Added {cred} credits to {message.author.mention}")
+            await ec.update_cred(message.guild.id, message.author.id, cred)    
+    except:
+        print("Tracking not valid here!")
     
     # snipe messages
     if message.content.lower() == "pls snipe":
@@ -902,5 +905,5 @@ async def on_member_join(member):
     await log('join', member)
     # channel = member.guild.system_channel
     # await channel.send("Welcome {}!".format(member.mention))
-    
+
 bot.run(discord_token)
