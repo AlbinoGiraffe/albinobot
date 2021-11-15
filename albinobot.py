@@ -812,8 +812,6 @@ async def on_message(message):
         return
     
     # conversation
-    if (len(message.attachments) > 0):
-            return
     m = await message.channel.history(limit=2).flatten()
     if(m[1].author == bot.user):
         query = await clean_input(message.content)
@@ -821,7 +819,7 @@ async def on_message(message):
 
         await message.channel.trigger_typing()
         try:
-            await message.reply(response)
+            await message.channel.send(response)
         except:
             await message.channel.send("*Ignores you*")
 
