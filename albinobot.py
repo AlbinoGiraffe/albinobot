@@ -831,7 +831,7 @@ async def on_message(message):
 
         await message.channel.trigger_typing()
         try:
-            await message.channel.send(response)
+            await message.reply(response)
         except:
             await message.channel.send("*Ignores you*")
 
