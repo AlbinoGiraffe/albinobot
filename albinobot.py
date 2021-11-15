@@ -812,16 +812,16 @@ async def on_message(message):
         return
     
     # conversation
-    m = await message.channel.history(limit=2).flatten()
-    if(m[1].author == bot.user):
-        query = await clean_input(message.content)
-        response = cb.say(query)
+    # m = await message.channel.history(limit=2).flatten()
+    # if(m[1].author == bot.user):
+    #     query = await clean_input(message.content)
+    #     response = cb.say(query)
 
-        await message.channel.trigger_typing()
-        try:
-            await message.channel.send(response)
-        except:
-            await message.channel.send("*Ignores you*")
+    #     await message.channel.trigger_typing()
+    #     try:
+    #         await message.channel.send(response)
+    #     except:
+    #         await message.channel.send("*Ignores you*")
 
     # bot is mentioned
     if bot.user.mentioned_in(message):
