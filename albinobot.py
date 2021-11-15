@@ -677,18 +677,17 @@ async def urban_define(ctx, *args):
         await ctx.send(embed=embd)
 
 # RNG bot
-@bot.command(name='gb', help="Pick something")
+@bot.command(name='gb', help="Talk to me")
 async def zodiac(ctx, *args):
-    await ctx.trigger_typing()
-    random.seed()
-    x = random.randint(0, 2)
-    if (x == 0):
-        await ctx.message.channel.send("Yes!")
+    query = await clean_input(' '.join(args))
+    response = cb.say(query)
+
+    await ctx.channel.trigger_typing()
+    if (len(response) > 0):
+        await ctx.send(response)
     else:
-        if (x == 1):
-            await ctx.message.channel.send("No!")
-        else:
-            await ctx.message.channel.send("IDK BRUH!")
+        await ctx.send("*Ignores you*")
+        return
 
 
 # ping tool
@@ -729,7 +728,14 @@ async def on_message(message):
     # check for recursion
     if message.author == bot.user:
         return
-
+    
+    # log messages    
+    if isinstance(message.channel, discord.channel.DMChannel):
+        await log('DM', message)
+    else:
+        if 'log' not in message.channel.name:
+            await log('message', message)
+            
     if message.content.startswith("="):
         expr = message.content.replace("=",'')
         await message.reply(str(sp(expr)))
@@ -760,14 +766,7 @@ async def on_message(message):
             await channel.send(embed=embed)
         except:
             await channel.send("No message to snipe!")
-            return
-
-    # log messages
-    if isinstance(message.channel, discord.channel.DMChannel):
-        await log('DM', message)
-    else:
-        if 'log' not in message.channel.name:
-            await log('message', message)
+        return
 
     # bot is DM'd
     if isinstance(message.channel, discord.channel.DMChannel):
@@ -810,7 +809,21 @@ async def on_message(message):
             new_msg = new_msg.upper()
 
         await message.channel.send(new_msg)
-        return 
+        return
+    
+    # conversation
+    if (len(message.attachments) > 0):
+            return
+    m = await message.channel.history(limit=2).flatten()
+    if(m[1].author == bot.user):
+        query = await clean_input(message.content)
+        response = cb.say(query)
+
+        await message.channel.trigger_typing()
+        try:
+            await message.reply(response)
+        except:
+            await message.channel.send("*Ignores you*")
 
     # bot is mentioned
     if bot.user.mentioned_in(message):
