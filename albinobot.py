@@ -90,13 +90,14 @@ async def log(type, message):
                     message.discriminator))
 
 
-# clean messages for cleverbot
+# clean messages
 async def clean_input(input):
     query = input.replace('<@560284009469575169> ', '')
     query = query.replace('<@!560284009469575169> ', '')
     query = query.replace('<', '')
     query = query.replace('>', '')
     query = query.replace('@', '')
+    query = query.replace('@everyone', '@\u200beveryone')
     return query
 
 
@@ -551,11 +552,10 @@ async def delete(ctx, n: int):
 # make bot say something
 @bot.command(help="Make bot say something")
 @commands.check(check_user)
-async def say(ctx, *args):
+async def say(ctx, *, arg):
     await ctx.trigger_typing()
-    new_message = ' '.join(args)
     # sanitize input
-    new_message = new_message.replace('@everyone', '@\u200beveryone')
+    new_message = arg.replace('@everyone', '@\u200beveryone')
     await delete_message(ctx.message)
     await ctx.send(new_message)
 
@@ -563,14 +563,13 @@ async def say(ctx, *args):
 # uwuifier
 @bot.command(help="UWUify a message")
 @commands.check(check_user)
-async def uwu(ctx, *args):
+async def uwu(ctx, *, arg):
     await ctx.trigger_typing()
-    new_message = ' '.join(args)
     # sanitize input
-    new_message = new_message.replace('@everyone', '@\u200beveryone')
+    arg = await clean_input(arg)
 
     await delete_message(ctx.message)
-    await ctx.send(uwuify.uwu(new_message))
+    await ctx.send(uwuify.uwu(arg))
 
 # anti snipe
 @bot.command(name="as")
