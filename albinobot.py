@@ -659,6 +659,12 @@ async def get_scores(ctx):
     
 ## END ECONOMY COMMANDS
 
+@bot.command(name="pdf", hidden=True)
+async def bradadon_funny(ctx):
+    await ctx.trigger_typing()
+    usr = await bot.fetch_user(654564428150472714)
+    await ctx.send("{} pdf file 😳".format(usr.mention))
+    await delete_message(ctx.message)
 
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
@@ -810,18 +816,6 @@ async def on_message(message):
 
         await message.channel.send(new_msg)
         return
-    
-    # conversation
-    # m = await message.channel.history(limit=2).flatten()
-    # if(m[1].author == bot.user):
-    #     query = await clean_input(message.content)
-    #     response = cb.say(query)
-
-    #     await message.channel.trigger_typing()
-    #     try:
-    #         await message.channel.send(response)
-    #     except:
-    #         await message.channel.send("*Ignores you*")
 
     # bot is mentioned
     if bot.user.mentioned_in(message):
