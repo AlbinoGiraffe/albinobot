@@ -669,7 +669,8 @@ async def bradadon_funny(ctx):
 @commands.check(check_user)
 @bot.command(name="id", help="ID a user")
 async def getuser_id(ctx, user: discord.User):
-    ctx.send(f"*{user.name}*'s ID is {user.id}")
+    await ctx.send(f"*{user.name}*'s ID is {user.id}")
+    await delete_message(ctx.message)
     
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
