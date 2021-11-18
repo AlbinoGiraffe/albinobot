@@ -662,10 +662,15 @@ async def get_scores(ctx):
 @bot.command(name="pdf", hidden=True)
 async def bradadon_funny(ctx):
     await ctx.trigger_typing()
-    usr = await bot.fetch_user(654564428150472714)
+    usr = await bot.fetch_user(878185975115808788)
     await ctx.send("{} pdf file 😳".format(usr.mention))
     await delete_message(ctx.message)
 
+@commands.check(check_user)
+@bot.command(name="id", help="ID a user")
+async def getuser_id(ctx, user: discord.User):
+    ctx.send(f"*{user.name}*'s ID is {user.id}")
+    
 # Urban Dictionary
 @bot.command(name="ud", help="Get an urdban dictionary definition")
 async def urban_define(ctx, *args):
