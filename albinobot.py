@@ -522,7 +522,7 @@ async def reply(ctx, id: int, *args):
         await m.reply(msg)
     except:
         print("Failed replying!")
-    await delete_message(ctx.message)
+    await delete_message(ctx.message)~
 
 
 # clear bot messages
